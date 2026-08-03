@@ -2,7 +2,6 @@
 set -eo pipefail
 
 source utils/common.sh
-source utils/s1.sh
 
 create_output_root_dir "s1_simple-setup"
 
