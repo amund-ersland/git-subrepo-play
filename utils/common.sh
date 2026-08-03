@@ -31,12 +31,20 @@ add_file_to_repo() {
     echo "herp derp" > $file
     git -C $repo_path add $file
     git -C $repo_path commit -m "Add file $last_added"
+
+    git -C $repo_path push
 }
 
 user_clone_repo(){
     local origin_path=$1
     local dst_path=$2
     git clone $origin_path "$dst_path/$(basename $origin_path)"
+}
+
+user_clone_recursive(){
+    local origin_path=$1
+    local dst_path=$2
+    git -c protocol.file.allow=always clone --recursive $origin_path "$dst_path/$(basename $origin_path)"
 }
 
 add_repo_as_submodule(){
@@ -47,6 +55,8 @@ add_repo_as_submodule(){
     git -C "$repo_path" -c protocol.file.allow=always submodule add "$submodule_origin" "$in_repo_path"
     git -C "$repo_path" add .gitmodules "$in_repo_path"
     git -C $repo_path commit -m "Add submodule $(basename "$submodule_origin")"
+
+    git -C $repo_path -c "protocol.file.allow=always" push
 }
 
 PRINT_INFO(){

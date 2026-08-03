@@ -26,14 +26,19 @@ git -C $root_dir/user1/sub-repo push
 
 #==============================================================================
 PRINT_LINE
-PRINT_INFO "Add sub-repo as a sub repo of main-repo"
+PRINT_INFO "User 1 adds sub-repo as a sub repo of main-repo"
 PRINT_LINE
 
 add_repo_as_submodule "$origins_dir/sub-repo" "$root_dir/user1/main-repo"
 
-PRINT_INFO $root_dir
+PRINT_INFO "Delete flat sub-repo as it is contained within main-repo"
+rm -rf $root_dir/user1/sub-repo
 
-# Let user2 clone the repo
-# user_clone_repo $origins_dir/main-repo $root_dir/user2
-# PRINT_INFO "git log for user2"
-# git -C $root_dir/user2/main-repo log
+#==============================================================================
+PRINT_LINE
+PRINT_INFO "User 2 clones main-repo recursively and gets sub-repo as part of it"
+PRINT_LINE
+
+user_clone_recursive $origins_dir/main-repo $root_dir/user2
+PRINT_INFO "git log for user2"
+tree "$root_dir/user2/main-repo"
