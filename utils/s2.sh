@@ -12,11 +12,10 @@ s2_init() {
     create_bare_repo "sub-repo"
 
     user_clone_repo $origins_dir/main-repo $root_dir/user1
-    add_file_to_repo $root_dir/user1/main-repo
-    git -C $root_dir/user1/main-repo push
+    commit_push_add_file $root_dir/user1/main-repo
 
     user_clone_repo $origins_dir/sub-repo $root_dir/user1
-    add_file_to_repo $root_dir/user1/sub-repo
+    commit_push_add_file $root_dir/user1/sub-repo
     git -C $root_dir/user1/sub-repo push
 
     add_repo_as_submodule "$origins_dir/sub-repo" "$root_dir/user1/main-repo"
