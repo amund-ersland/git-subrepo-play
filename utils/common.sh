@@ -26,7 +26,7 @@ add_file_to_repo() {
         mkdir -p $dst
     fi
 
-    local file="$dst/$(date "+%s").txt"
+    local file="$dst/$(uuidgen | md5sum | cut -c1-4).txt"
     last_added=$(basename $file)
     echo "herp derp" > $file
     git -C $repo_path add $file
