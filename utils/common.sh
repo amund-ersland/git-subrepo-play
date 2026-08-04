@@ -1,5 +1,3 @@
-USERS=2
-
 setup_layered_repos(){
     local levels=$1
     local name_base=${2:-""}
@@ -89,9 +87,8 @@ create_output_root_dir() {
     remote_dir="$root_dir/remotes"
 
     # user workspaces
-    for n in $(seq 1 "$USERS"); do
-        mkdir -p "$root_dir/user$n"
-    done
+    mkdir -p "$root_dir/user1"
+    mkdir -p "$root_dir/user2"
 
     # create symlink from current dir
     if [[ -L output_dir ]]; then
