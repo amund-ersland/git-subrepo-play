@@ -9,12 +9,11 @@ setup_layered_repos(){
         create_bare_repo "parent-repo"
         create_bare_repo "child-repo"
 
-        PRINT_INFO "Setup user 1 parent workspace"
+        # Setup user 1 parent workspace"
         clone $remote_dir/parent-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/parent-repo
 
-        PRINT_INFO "Setup user 1 child initial commit"
-        # make initial commit to child repo to be able to add it as a submodule
+        # Setup user 1 child initial commit (footnote 1)"
         clone $remote_dir/child-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/child-repo
         rm -rf $root_dir/user1/child-repo
@@ -143,3 +142,9 @@ PRINT_LINE(){
     for i in $(seq 1 80); do printf '='; done
     printf '\033[0m\n'
 }
+
+
+#===============================================================================
+# Footnotes
+
+# 1) Make initial commit to child repo to be able to add it as a submodule
