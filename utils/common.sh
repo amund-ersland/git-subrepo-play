@@ -51,6 +51,11 @@ setup_layered_repos(){
             --superproject "$root_dir/user1/parent-repo/child-repo" \
             --child_remote "$remote_dir/grandchild-repo"
 
+        # Update parent repo to record child-repo's new commit (which now contains the grandchild submodule)
+        git -C "$root_dir/user1/parent-repo" add child-repo
+        git -C "$root_dir/user1/parent-repo" commit -m "Update child submodule to include grandchild-repo"
+        git -C "$root_dir/user1/parent-repo" -c protocol.file.allow=always push
+
         clone_recursive $remote_dir/parent-repo $root_dir/user2
     fi
 
