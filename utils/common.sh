@@ -9,11 +9,11 @@ setup_layered_repos(){
         create_bare_repo "parent-repo"
         create_bare_repo "child-repo"
 
-        # Setup user 1 parent workspace"
+        # Setup user1 parent"
         clone $remote_dir/parent-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/parent-repo
 
-        # Setup user 1 child initial commit (footnote 1)"
+        # Setup user1 child initial commit (footnote 1)"
         clone $remote_dir/child-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/child-repo
         rm -rf $root_dir/user1/child-repo
@@ -29,16 +29,16 @@ setup_layered_repos(){
         create_bare_repo "child-repo"
         create_bare_repo "grandchild-repo"
 
-        # Setup user 1 parent workspace"
+        # Setup user1 parent"
         clone $remote_dir/parent-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/parent-repo
 
-        # Setup user 1 child initial commit (footnote 1)"
+        # Setup user1 child initial commit (footnote 1)"
         clone $remote_dir/child-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/child-repo
         rm -rf $root_dir/user1/child-repo
 
-        # Setup user 1 grandchild initial commit"
+        # Setup user1 grandchild initial commit"
         clone $remote_dir/grandchild-repo $root_dir/user1
         make_commit_and_push $root_dir/user1/grandchild-repo
         rm -rf $root_dir/user1/grandchild-repo
