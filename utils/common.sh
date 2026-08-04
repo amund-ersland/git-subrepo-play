@@ -93,12 +93,23 @@ run() {
         "$@"
         rc=$?
 
-        echo "[exit code: $rc]"
+        if [[ $rc -ne 0 ]]; then
+            echo "[exit code: $rc]"
+        fi
+
     } >> "$FULL_LOG" 2>&1
 
     return $rc
 }
 
+make_pretty_logs(){
+    for log in "$CMD_LOG" "$FULL_LOG"; do
+        if [[ -f "$log" ]]; then
+            # Replace absolute root_dir path with the output_dir symlink for portability
+            sed "s|$root_dir/||g" "$log" > "$log.pretty"
+        fi
+    done
+}
 
 create_output_root_dir() {
     local name_base="$1"
