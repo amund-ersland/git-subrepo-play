@@ -9,11 +9,11 @@ setup_layered_repos(){
 
         # Setup user1 parent"
         clone $remote_dir/parent-repo $root_dir/user1
-        make_commit_and_push $root_dir/user1/parent-repo
+        make_commit $root_dir/user1/parent-repo
 
         # Setup user1 child initial commit (footnote 1)"
         clone $remote_dir/child-repo $root_dir/user1
-        make_commit_and_push $root_dir/user1/child-repo
+        make_commit $root_dir/user1/child-repo
         run rm -rf $root_dir/user1/child-repo
 
         add_repo_as_submodule \
@@ -29,16 +29,16 @@ setup_layered_repos(){
 
         # Setup user1 parent"
         clone $remote_dir/parent-repo $root_dir/user1
-        make_commit_and_push $root_dir/user1/parent-repo
+        make_commit $root_dir/user1/parent-repo
 
         # Setup user1 child initial commit (footnote 1)"
         clone $remote_dir/child-repo $root_dir/user1
-        make_commit_and_push $root_dir/user1/child-repo
+        make_commit $root_dir/user1/child-repo
         run rm -rf $root_dir/user1/child-repo
 
         # Setup user1 grandchild initial commit"
         clone $remote_dir/grandchild-repo $root_dir/user1
-        make_commit_and_push $root_dir/user1/grandchild-repo
+        make_commit $root_dir/user1/grandchild-repo
         run rm -rf $root_dir/user1/grandchild-repo
 
         add_repo_as_submodule \
@@ -151,11 +151,8 @@ make_commit(){
     echo "herp derp" > $file
     run git -C $repo_path add $file
     run git -C $repo_path commit -m "$msg, added $last_added to ./files"
-}
 
-make_commit_and_push() {
-    make_commit $1 $2
-    run git -C $1 push
+    run git -C $repo_path push
 }
 
 update_superproject_with_submodule(){
@@ -163,6 +160,7 @@ update_superproject_with_submodule(){
     local submodule=$2
     local msg=${3:-update $superproject with current $submodule}
 
+    LOG_INFO "## update $(basename $superproject) with current $(basename $submodule)"
     run git -C "$superproject" add $submodule
     run git -C "$superproject" commit -m "$msg"
     run git -C "$superproject" -c protocol.file.allow=always push
@@ -178,6 +176,13 @@ clone_recursive(){
     local remote_path=$1
     local local_path=$2
     run git -c protocol.file.allow=always clone --recursive $remote_path "$local_path/$(basename $remote_path)"
+}
+
+update_recursive(){
+    local repo=$1
+    LOG_INFO "## pull changes in superproject and update submodules in $repo"
+    run git -C "$repo" pull
+    run git -C "$repo" -c protocol.file.allow=always submodule update --init --recursive
 }
 
 add_repo_as_submodule(){
