@@ -50,34 +50,29 @@ setup_layered_repos(){
             --child_remote "$remote_dir/grandchild-repo"
 
         # Update parent repo to record child-repo's new commit (which now contains the grandchild submodule)
-        run git -C "$root_dir/user1/parent-repo" add child-repo
-        run git -C "$root_dir/user1/parent-repo" commit -m "Update child submodule to include grandchild-repo"
-        run git -C "$root_dir/user1/parent-repo" -c protocol.file.allow=always push
+        update_superproject_with_submodule \
+            "$root_dir/user1/parent-repo" \
+            "child-repo" \
+            "Update child submodule to include grandchild-repo"
 
         clone_recursive $remote_dir/parent-repo $root_dir/user2
     fi
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"
 
-    PRINT_LINE
-    PRINT_INFO "📁 Remote repositories structure:"
+    STDOUT_LINE
+    STDOUT_INFO "📁 Remote repositories structure:"
     tree -L 1 "$remote_dir"
 
     echo -e ""
-    PRINT_LINE
-    PRINT_INFO "👤 User 1 workspace structure:"
+    STDOUT_LINE
+    STDOUT_INFO "👤 User 1 workspace structure:"
     tree "$root_dir/user1"
 
     echo -e ""
-    PRINT_LINE
-    PRINT_INFO "👤 User 2 workspace structure:"
+    STDOUT_LINE
+    STDOUT_INFO "👤 User 2 workspace structure:"
     tree "$root_dir/user2"
-}
-
-CASE_START(){
-    local msg=$1
-    PRINT_INFO "🚀 $msg"
-    read
 }
 
 #===============================================================================
@@ -163,6 +158,16 @@ make_commit_and_push() {
     run git -C $1 push
 }
 
+update_superproject_with_submodule(){
+    local superproject=$1
+    local submodule=$2
+    local msg=${3:-update $superproject with current $submodule}
+
+    run git -C "$superproject" add $submodule
+    run git -C "$superproject" commit -m "$msg"
+    run git -C "$superproject" -c protocol.file.allow=always push
+}
+
 clone(){
     local remote_path=$1
     local local_path=$2
@@ -203,8 +208,7 @@ add_repo_as_submodule(){
 
     local path_to_submodule=$(basename "$child_remote")
 
-    LOG_HEADER "add $(basename $child_remote) as submodule to $(basename $superproject)"
-
+    LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
 
     run git -C "$superproject" -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
     run git -C "$superproject" commit -m "Add submodule "$path_to_submodule""
@@ -212,21 +216,31 @@ add_repo_as_submodule(){
     run git -C "$superproject" -c "protocol.file.allow=always" push
 }
 
-LOG_HEADER(){
+INFO(){
+    LOG_INFO "$1"
+    STDOUT_INFO "$1"
+}
+
+LOG_INFO(){
     echo -e "\n\033[36m$1\033[0m" >> $CMD_LOG
     echo -e "\n\033[36m$1\033[0m" >> $FULL_LOG
 }
 
-PRINT_INFO(){
+STDOUT_INFO(){
     echo -e "\033[35m$1\033[0m"
 }
 
-PRINT_LINE(){
+STDOUT_LINE(){
     printf '\033[35m'
     for i in $(seq 1 80); do printf '='; done
     printf '\033[0m\n'
 }
 
+CASE_START(){
+    local msg=$1
+    STDOUT_INFO "🚀 $msg"
+    read
+}
 
 #===============================================================================
 # Footnotes
