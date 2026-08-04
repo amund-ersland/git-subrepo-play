@@ -84,6 +84,22 @@ CASE_START(){
 # helpers
 #===============================================================================
 
+run() {
+    echo "$*" >> "$CMD_LOG"
+    {
+        echo
+        echo "$ $*"
+
+        "$@"
+        rc=$?
+
+        echo "[exit code: $rc]"
+    } >> "$FULL_LOG" 2>&1
+
+    return $rc
+}
+
+
 create_output_root_dir() {
     local name_base="$1"
     name="${name_base}_$(date +%Y-%m-%d_%H:%M:%S)"
@@ -101,12 +117,17 @@ create_output_root_dir() {
         rm -rf output_dir
     fi
 
+    # create log dir
+    mkdir $root_dir/logs
+    CMD_LOG=$root_dir/logs/commands.log
+    FULL_LOG=$root_dir/logs/full.log
+
     ln -s $root_dir output_dir
 }
 
 create_bare_repo() {
     local name="$1"
-    git init --bare "$remote_dir/$name"
+    run git init --bare "$remote_dir/$name"
 }
 
 make_commit(){
