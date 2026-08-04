@@ -2,29 +2,45 @@ USERS=2
 
 setup_layered_repos(){
     local levels=$1
-    local base=${2:-nobase}
-    create_output_root_dir $1
+    local name_base=${2:-""}
+    create_output_root_dir $name_base
 
-    if [[ $1 -eq 2 ]]; then
-        create_bare_repo "main-repo"
-        create_bare_repo "sub-repo"
+    if [[ $levels -eq 2 ]]; then
+        create_bare_repo "parent-repo"
+        create_bare_repo "child-repo"
 
-        clone $remote_dir/main-repo $root_dir/user1
-        make_commit $root_dir/user1/main-repo
+        PRINT_INFO "Setup user 1 parent workspace"
+        clone $remote_dir/parent-repo $root_dir/user1
+        make_commit_and_push $root_dir/user1/parent-repo
 
-        clone $remote_dir/sub-repo $root_dir/user1
-        make_commit $root_dir/user1/sub-repo
+        PRINT_INFO "Setup user 1 child initial commit"
+        # make initial commit to child repo to be able to add it as a submodule
+        clone $remote_dir/child-repo $root_dir/user1
+        make_commit_and_push $root_dir/user1/child-repo
+        rm -rf $root_dir/user1/child-repo
 
-        add_repo_as_submodule
-            --parent_repo "$root_dir/user1/main-repo"
-            --child_repo "$remote_dir/sub-repo"
+        add_repo_as_submodule \
+            --superproject "$root_dir/user1/parent-repo" \
+            --child_remote "$remote_dir/child-repo"
 
-        rm -rf $root_dir/user1/sub-repo
-
-
-    clone_recursive $remote_dir/main-repo $root_dir/user2
-        tree "$root_dir/user2/main-repo"
+        clone_recursive $remote_dir/parent-repo $root_dir/user2
     fi
+
+    echo -e  "\033[32m ✅ Setup complete\033[0m"
+
+    PRINT_LINE
+    PRINT_INFO "📁 Remote repositories structure:"
+    tree -L 1 "$remote_dir"
+
+    echo -e ""
+    PRINT_LINE
+    PRINT_INFO "👤 User 1 workspace structure:"
+    tree "$root_dir/user1"
+
+    echo -e ""
+    PRINT_LINE
+    PRINT_INFO "👤 User 2 workspace structure:"
+    tree "$root_dir/user2"
 }
 
 #===============================================================================
@@ -73,34 +89,29 @@ make_commit_and_push() {
 }
 
 clone(){
-    local origin_path=$1
+    local remote_path=$1
     local local_path=$2
-    git clone $origin_path "$local_path/$(basename $origin_path)"
+    git clone $remote_path "$local_path/$(basename $remote_path)"
 }
 
 clone_recursive(){
-    local origin_path=$1
+    local remote_path=$1
     local local_path=$2
-    git -c protocol.file.allow=always clone --recursive $origin_path "$local_path/$(basename $origin_path)"
+    git -c protocol.file.allow=always clone --recursive $remote_path "$local_path/$(basename $remote_path)"
 }
 
 add_repo_as_submodule(){
-    local parent_repo=""
-    local child_repo=""
-    local submodule_path=$(basename "$child_repo")
+    local superproject=""
+    local child_remote=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --parent_repo)
-                parent_repo=$2
+            --superproject)
+                superproject=$2
                 shift 2
                 ;;
-            --child_repo)
-                child_repo=$2
-                shift 2
-                ;;
-            --submodule-path)
-                submodule_path=$2
+            --child_remote)
+                child_remote=$2
                 shift 2
                 ;;
             *)
@@ -110,16 +121,17 @@ add_repo_as_submodule(){
         esac
     done
 
-    if [[ -z "$child_repo" || -z "$parent_repo" ]]; then
-        echo -e "\033[31mMissing required arguments: --main-repo and --remote-sub"
+    if [[ -z "$child_remote" || -z "$superproject" ]]; then
+        echo -e "\033[31mMissing required arguments: --superproject and/or --child_remote"
         return 1
     fi
 
-    git -C "$parent_repo" -c protocol.file.allow=always submodule add "$child_repo" "$submodule_path"
-    git -C "$parent_repo" add .gitmodules "$submodule_path"
-    git -C "$parent_repo" commit -m "Add submodule $(basename "$child_repo")"
+    local path_to_submodule=$(basename "$child_remote")
 
-    git -C "$parent_repo" -c "protocol.file.allow=always" push
+    git -C "$superproject" -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
+    git -C "$superproject" commit -m "Add submodule "$path_to_submodule""
+
+    git -C "$superproject" -c "protocol.file.allow=always" push
 }
 
 PRINT_INFO(){
