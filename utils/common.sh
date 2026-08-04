@@ -23,6 +23,35 @@ setup_layered_repos(){
             --child_remote "$remote_dir/child-repo"
 
         clone_recursive $remote_dir/parent-repo $root_dir/user2
+
+    elif [[ $levels -eq 3 ]]; then
+        create_bare_repo "parent-repo"
+        create_bare_repo "child-repo"
+        create_bare_repo "grandchild-repo"
+
+        # Setup user 1 parent workspace"
+        clone $remote_dir/parent-repo $root_dir/user1
+        make_commit_and_push $root_dir/user1/parent-repo
+
+        # Setup user 1 child initial commit (footnote 1)"
+        clone $remote_dir/child-repo $root_dir/user1
+        make_commit_and_push $root_dir/user1/child-repo
+        rm -rf $root_dir/user1/child-repo
+
+        # Setup user 1 grandchild initial commit"
+        clone $remote_dir/grandchild-repo $root_dir/user1
+        make_commit_and_push $root_dir/user1/grandchild-repo
+        rm -rf $root_dir/user1/grandchild-repo
+
+        add_repo_as_submodule \
+            --superproject "$root_dir/user1/parent-repo" \
+            --child_remote "$remote_dir/child-repo"
+
+        add_repo_as_submodule \
+            --superproject "$root_dir/user1/parent-repo/child-repo" \
+            --child_remote "$remote_dir/grandchild-repo"
+
+        clone_recursive $remote_dir/parent-repo $root_dir/user2
     fi
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"
@@ -58,6 +87,13 @@ create_output_root_dir() {
     for n in $(seq 1 "$USERS"); do
         mkdir -p "$root_dir/user$n"
     done
+
+    # create symlink from current dir
+    if [[ -L output_dir ]]; then
+        rm -rf output_dir
+    fi
+
+    ln -s $root_dir output_dir
 }
 
 create_bare_repo() {
