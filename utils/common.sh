@@ -141,7 +141,7 @@ make_commit(){
     repo_path=$(relpath $repo_path)
     local msg=${2:-""}
 
-    run cd $repo_path
+    ensure_dir $repo_path
     local dir=files
 
     if [[ ! -d $dir ]]; then
@@ -168,7 +168,7 @@ update_superproject_with_submodule(){
     local msg=${3:-update $superproject with current $submodule}
 
     LOG_INFO "## update $(basename $superproject) with current $(basename $submodule)"
-    run cd $superproject
+    ensure_dir $superproject
     run git add $submodule
     run git commit -m "$msg"
     run git -c protocol.file.allow=always push
@@ -177,7 +177,7 @@ update_superproject_with_submodule(){
 clone(){
     local remote_path=$1
     local local_path=$2
-    run cd $local_path
+    ensure_dir $local_path
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
@@ -187,7 +187,7 @@ clone(){
 clone_recursive(){
     local remote_path=$1
     local local_path=$2
-    run cd $local_path
+    ensure_dir $local_path
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
@@ -197,7 +197,7 @@ clone_recursive(){
 update_recursive(){
     local repo=$(relpath $1)
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
-    run cd $repo
+    ensure_dir $repo
     run git pull
     run git -c protocol.file.allow=always submodule update --init --recursive
 }
