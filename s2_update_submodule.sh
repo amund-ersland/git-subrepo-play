@@ -16,7 +16,7 @@ INFO "# user1 updates parent repo with newest child repo"
 update_superproject_with_submodule $root_dir/user1/parent-repo child-repo
 
 INFO "# user2 pulls all the updates"
-update_recursive $root_dir/user2/parent-repo
+update_init_recursive $root_dir/user2/parent-repo
 
 repo_status $root_dir/user1/parent-repo child-repo user1
 repo_status $root_dir/user2/parent-repo child-repo user2

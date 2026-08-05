@@ -13,7 +13,7 @@ INFO "# user1 performs a commit to child repo"
 make_commit "$root_dir/user1/parent-repo/child-repo"
 
 INFO "# user2 pulls all the updates"
-update_recursive $root_dir/user2/parent-repo
+update_remote_recursive $root_dir/user2/parent-repo
 
 repo_status $root_dir/user1/parent-repo child-repo user1
 repo_status $root_dir/user2/parent-repo child-repo user2
