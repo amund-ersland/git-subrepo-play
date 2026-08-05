@@ -131,9 +131,11 @@ create_bare_repo() {
 
 make_commit(){
     local repo_path=$1
+    repo_path=$(relpath $repo_path)
     local msg=${2:-""}
 
-    local dir=$repo_path/files
+    run cd $repo_path
+    local dir=files
 
     if [[ ! -d $dir ]]; then
         run mkdir -p $dir
@@ -142,15 +144,20 @@ make_commit(){
     local file="$dir/$(uuidgen | md5sum | cut -c1-4).txt"
     last_added=$(basename $file)
     echo "herp derp" > $file
-    run cd $repo_path
     run git add $file
-    run git commit -m "$msg, added $last_added to ./files"
+    run git commit -m "\"$msg added $last_added\""
 
     run git push
 }
 
+relpath(){
+    export abs_path=$1
+    echo "$(realpath --relative-to $PWD $abs_path)"
+}
+
 update_superproject_with_submodule(){
     local superproject=$1
+    superproject=$(relpath $superproject)
     local submodule=$2
     local msg=${3:-update $superproject with current $submodule}
 
