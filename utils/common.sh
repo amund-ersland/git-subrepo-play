@@ -271,8 +271,8 @@ INFO(){
 }
 
 LOG_INFO(){
-    echo -e "\n\033[35m$1\033[0m" >> $CMD_LOG
-    echo -e "\n\033[35m$1\033[0m" >> $FULL_LOG
+    printf "\n\033[35m$1\033[0m" >> $CMD_LOG
+    printf "\n\033[35m$1\033[0m" >> $FULL_LOG
 }
 
 STDOUT_INFO(){
@@ -285,8 +285,8 @@ TEXT(){
 }
 
 LOG_TEXT(){
-    echo -e "\n$1" >> $CMD_LOG
-    echo -e "\n$1" >> $FULL_LOG
+    printf "\n$1" >> $CMD_LOG
+    printf "\n$1" >> $FULL_LOG
 }
 
 STDOUT_TEXT(){
