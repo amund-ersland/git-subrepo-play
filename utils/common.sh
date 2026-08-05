@@ -188,7 +188,7 @@ clone_recursive(){
 }
 
 update_recursive(){
-    local repo=$1
+    local repo=$(relpath $1)
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
     run cd $repo
     run git pull
@@ -225,11 +225,8 @@ add_repo_as_submodule(){
 
     LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
 
-    cd $superproject
-
-    child_remote="$(relpath $child_remote)"
-    echo -e "\033[31m$child_remote\033[0m"
-
+    superproject=$(relpath $superproject)
+    run cd $superproject
     run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
     run git commit -m "Add submodule "$path_to_submodule""
 
