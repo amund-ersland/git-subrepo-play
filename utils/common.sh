@@ -156,9 +156,8 @@ relpath(){
 }
 
 update_superproject_with_submodule(){
-    local superproject=$1
-    superproject=$(relpath $superproject)
-    local submodule=$2
+    superproject=$(relpath $1)
+    submodule=$(relpath $2)
     local msg=${3:-update $superproject with current $submodule}
 
     LOG_INFO "## update $(basename $superproject) with current $(basename $submodule)"
@@ -172,6 +171,9 @@ clone(){
     local remote_path=$1
     local local_path=$2
     run cd $local_path
+    remote_path=$(realpath $remote_path)
+    local_path=$(realpath $local_path)
+
     run git clone $remote_path
 }
 
@@ -179,6 +181,9 @@ clone_recursive(){
     local remote_path=$1
     local local_path=$2
     run cd $local_path
+    remote_path=$(realpath $remote_path)
+    local_path=$(realpath $local_path)
+
     run git -c protocol.file.allow=always clone --recursive $remote_path
 }
 
@@ -221,6 +226,10 @@ add_repo_as_submodule(){
     LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
 
     cd $superproject
+
+    child_remote="$(relpath $child_remote)"
+    echo -e "\033[31m$child_remote\033[0m"
+
     run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
     run git commit -m "Add submodule "$path_to_submodule""
 
