@@ -263,11 +263,13 @@ repo_status() {
     INFO $LINE
 
     INFO "\033[36m$strong_title\033[35m - status of $(basename $superproject) and its submodules"
+    TEXT "\nDescription           | sha     | command to run "
+    TEXT "----------------------|---------|----------------"
     for what in "${!what_to_command[@]}"; do
         TEXT "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
     done
 
-    INFO "Submodule status"
+    INFO "\nSubmodule status \033[0m (git submodule status)"
     TEXT "$(git submodule status)"
     INFO "$LINE\n"
 }
