@@ -241,6 +241,25 @@ add_repo_as_submodule(){
     run git -c "protocol.file.allow=always" push
 }
 
+repo_status() {
+    local superproject=$1
+    local submodule=$2
+
+    ensure_dir $superproject
+
+    declare -A what_to_command=(
+        [superproject-sha]="git rev-parse --short HEAD"
+        [submodule-tracked-sha]="git ls-tree HEAD $submodule | cut -d' ' -f3 | cut -c1-7"
+        [submodule-current-sha]="git rev-parse --short HEAD $submodule"
+    )
+
+    STDOUT_LINE
+    for what in "${!what_to_command[@]}"; do
+        echo -e "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
+    done
+
+}
+
 INFO(){
     LOG_INFO "$1"
     STDOUT_INFO "$1"
