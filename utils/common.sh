@@ -75,28 +75,6 @@ setup_layered_repos(){
     tree "$root_dir/user2"
 }
 
-#===============================================================================
-# helpers
-#===============================================================================
-
-run() {
-    echo "$*" | tee -a "$CMD_LOG"
-    {
-        echo
-        echo "$ $*"
-
-        "$@"
-        rc=$?
-
-        if [[ $rc -ne 0 ]]; then
-            echo "[exit code: $rc]"
-        fi
-
-    } >> "$FULL_LOG" 2>&1
-
-    return $rc
-}
-
 create_output_root_dir() {
     local name_base="$1"
     name="${name_base}_$(date +%Y-%m-%d_%H:%M:%S)"
@@ -121,6 +99,28 @@ create_output_root_dir() {
     FULL_LOG=$root_dir/logs/full.log
 
     ln -s $root_dir output_dir
+}
+
+#===============================================================================
+# helpers
+#===============================================================================
+
+run() {
+    echo "$*" | tee -a "$CMD_LOG"
+    {
+        echo
+        echo "$ $*"
+
+        "$@"
+        rc=$?
+
+        if [[ $rc -ne 0 ]]; then
+            echo "[exit code: $rc]"
+        fi
+
+    } >> "$FULL_LOG" 2>&1
+
+    return $rc
 }
 
 create_bare_repo() {
