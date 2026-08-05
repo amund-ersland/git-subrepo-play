@@ -152,7 +152,7 @@ make_commit(){
     last_added=$(basename $file)
     echo "herp derp" > $file
     run git add $file
-    run git commit -m "\"$msg added $last_added\""
+    run git commit -m "\"${msg}add $last_added\""
 
     run git push
 }
@@ -163,11 +163,12 @@ relpath(){
 }
 
 update_superproject_with_submodule(){
-    superproject=$(relpath $1)
-    submodule=$(relpath $2)
-    local msg=${3:-update $superproject with current $submodule}
+    superproject=$1
+    submodule=$2
 
-    LOG_INFO "## update $(basename $superproject) with current $(basename $submodule)"
+    local msg="update $(basename $superproject) with current $submodule"
+    LOG_INFO "## $msg"
+
     ensure_dir $superproject
     run git add $submodule
     run git commit -m "$msg"
@@ -246,8 +247,8 @@ INFO(){
 }
 
 LOG_INFO(){
-    echo -e "\n\033[36m$1\033[0m" >> $CMD_LOG
-    echo -e "\n\033[36m$1\033[0m" >> $FULL_LOG
+    echo -e "\n\033[35m$1\033[0m" >> $CMD_LOG
+    echo -e "\n\033[35m$1\033[0m" >> $FULL_LOG
 }
 
 STDOUT_INFO(){
@@ -262,7 +263,7 @@ STDOUT_LINE(){
 
 CASE_START(){
     local msg=$1
-    STDOUT_INFO "🚀 $msg"
+    INFO "🚀 $msg"
     read
 }
 
