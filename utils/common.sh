@@ -248,16 +248,16 @@ repo_status() {
     ensure_dir $superproject
 
     declare -A what_to_command=(
-        [superproject-sha]="git rev-parse --short HEAD"
-        [submodule-tracked-sha]="git ls-tree HEAD $submodule | cut -d' ' -f3 | cut -c1-7"
-        [submodule-current-sha]="git rev-parse --short HEAD $submodule"
+        [submodule current sha]="git -C $submodule rev-parse --short HEAD"
+        [submodule tracked sha]="git ls-tree HEAD $submodule | head -1 | cut -d' ' -f3 | cut -c1-7"
+        [superproject sha     ]="git rev-parse --short HEAD"
     )
 
-    STDOUT_LINE
+    INFO "Status of $(basename $superproject) and its submodules"
     for what in "${!what_to_command[@]}"; do
         echo -e "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
     done
-
+    echo -e "\033[35msubmodule status\033[0m: $(git submodule status)"
 }
 
 INFO(){
