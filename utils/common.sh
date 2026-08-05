@@ -125,8 +125,15 @@ run() {
 
 create_bare_repo() {
     local name="$1"
-    run cd $remote_dir
+    ensure_dir $remote_dir
     run git init --bare $name
+}
+
+ensure_dir(){
+    dir=$1
+    if [[ $(realpath $dir) != "$PWD" ]]; then
+        run cd $(relpath $dir)
+    fi
 }
 
 make_commit(){
