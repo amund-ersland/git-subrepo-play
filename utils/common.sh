@@ -150,6 +150,7 @@ make_commit(){
 
     local file="$dir/$(uuidgen | md5sum | cut -c1-4).txt"
     last_added=$(basename $file)
+    TEXT "echo \"herp derp\" > $file"
     echo "herp derp" > $file
     run git add $file
     run git commit -m "\"${msg}add $last_added\""
@@ -171,7 +172,7 @@ update_superproject_with_submodule(){
 
     ensure_dir $superproject
     run git add $submodule
-    run git commit -m "$msg"
+    run git commit -m "\"$msg\""
     run git -c protocol.file.allow=always push
 }
 
@@ -241,7 +242,7 @@ add_repo_as_submodule(){
     superproject=$(relpath $superproject)
     run cd $superproject
     run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
-    run git commit -m "Add submodule "$path_to_submodule""
+    run git commit -m "\"Add submodule "$path_to_submodule"\""
 
     run git -c "protocol.file.allow=always" push
 }
@@ -301,9 +302,18 @@ STDOUT_TEXT(){
     echo -e "$1"
 }
 
-CASE_START(){
+PAUSE(){
+    read -p "press enter to continue"
+    clear
     local msg=$1
-    INFO "🚀 $msg"
+    INFO "💡 $msg"
+    read
+}
+
+STDOUT_PAUSE(){
+    clear
+    local msg=$1
+    STDOUT_INFO "💡 $msg"
     read
 }
 
