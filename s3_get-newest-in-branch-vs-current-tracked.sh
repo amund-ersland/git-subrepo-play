@@ -18,9 +18,10 @@ make_commit "$root_dir/user1/parent-repo/child-repo"
 PAUSE "user2 pulls all the updates fetching the latest remotes"
 update_remote_recursive $root_dir/user2/parent-repo
 
-PAUSE "Print status for user1"
+PAUSE "Print status for user 1 and 2 for the repos"
 repo_status $root_dir/user1/parent-repo child-repo user1
-PAUSE "Print status for user2"
 repo_status $root_dir/user2/parent-repo child-repo user2
+repo_status $root_dir/user1/parent-repo/child-repo grandchild-repo user1
+repo_status $root_dir/user2/parent-repo/child-repo grandchild-repo user2
 
 cd $_PWD

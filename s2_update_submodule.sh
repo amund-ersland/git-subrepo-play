@@ -18,9 +18,8 @@ update_superproject_with_submodule $root_dir/user1/parent-repo child-repo
 PAUSE "user2 pulls all the updates"
 update_init_recursive $root_dir/user2/parent-repo
 
-PAUSE "Print status for user1"
+PAUSE "Print status for user1 and user2"
 repo_status $root_dir/user1/parent-repo child-repo user1
-PAUSE "Print status for user2"
 repo_status $root_dir/user2/parent-repo child-repo user2
 
 cd $_PWD

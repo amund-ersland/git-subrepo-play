@@ -196,17 +196,21 @@ clone_recursive(){
     run git -c protocol.file.allow=always clone --recursive $remote_path
 }
 
-update_init_recursive(){
+update_recursive_base(){
     local repo=$(relpath $1)
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
     ensure_dir $repo
     run git pull
+}
+
+update_init_recursive(){
+    update_recursive_base $1
     run git -c protocol.file.allow=always submodule update --init --recursive
 }
 
 update_remote_recursive(){
-    update_init_recursive $1
-    run git -c protocol.file.allow=always submodule update --remote --recursive
+    update_recursive_base $1
+    run git -c protocol.file.allow=always submodule update --remote --init --recursive
 }
 
 add_repo_as_submodule(){
