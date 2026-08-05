@@ -4,9 +4,8 @@ set -eo pipefail
 _PWD=$PWD
 
 source utils/common.sh
-source utils/s2.sh
 
-s2_init
+setup_layered_repos 3 "s2"
 
 CASE_START "user1 updates child-repo"
 
