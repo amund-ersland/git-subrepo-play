@@ -60,17 +60,17 @@ setup_layered_repos(){
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"
 
-    STDOUT_LINE
+    STDOUT_INFO $LINE
     STDOUT_INFO "📁 Remote repositories structure:"
     tree -L 1 "$remote_dir"
 
     echo -e ""
-    STDOUT_LINE
+    STDOUT_INFO $LINE
     STDOUT_INFO "👤 User 1 workspace structure:"
     tree "$root_dir/user1"
 
     echo -e ""
-    STDOUT_LINE
+    STDOUT_INFO $LINE
     STDOUT_INFO "👤 User 2 workspace structure:"
     tree "$root_dir/user2"
 }
@@ -253,12 +253,17 @@ repo_status() {
         [superproject sha     ]="git rev-parse --short HEAD"
     )
 
+    INFO $LINE
     INFO "Status of $(basename $superproject) and its submodules"
     for what in "${!what_to_command[@]}"; do
-        echo -e "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
+        TEXT "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
     done
-    echo -e "\033[35msubmodule status\033[0m: $(git submodule status)"
+
+    INFO "Submodule status"
+    TEXT "$(git submodule status)"
 }
+
+LINE="$(for i in $(seq 1 80); do printf '='; done)"
 
 INFO(){
     LOG_INFO "$1"
@@ -274,10 +279,18 @@ STDOUT_INFO(){
     echo -e "\033[35m$1\033[0m"
 }
 
-STDOUT_LINE(){
-    printf '\033[35m'
-    for i in $(seq 1 80); do printf '='; done
-    printf '\033[0m\n'
+TEXT(){
+    LOG_TEXT "$1"
+    STDOUT_TEXT "$1"
+}
+
+LOG_TEXT(){
+    echo -e "\n$1" >> $CMD_LOG
+    echo -e "\n$1" >> $FULL_LOG
+}
+
+STDOUT_TEXT(){
+    echo -e "$1"
 }
 
 CASE_START(){
