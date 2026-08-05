@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 
+_PWD=$PWD
+
 source utils/common.sh
 source utils/s2.sh
 
@@ -17,4 +19,4 @@ update_superproject_with_submodule $root_dir/user1/parent-repo $root_dir/user1/p
 INFO "# User 2 pulls all the updates"
 update_recursive $root_dir/user2/parent-repo
 
-make_pretty_logs
+cd $_PWD

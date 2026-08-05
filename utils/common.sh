@@ -80,7 +80,7 @@ setup_layered_repos(){
 #===============================================================================
 
 run() {
-    echo "$*" >> "$CMD_LOG"
+    echo "$*" | tee -a "$CMD_LOG"
     {
         echo
         echo "$ $*"
@@ -97,15 +97,6 @@ run() {
     return $rc
 }
 
-make_pretty_logs(){
-    for log in "$CMD_LOG" "$FULL_LOG"; do
-        if [[ -f "$log" ]]; then
-            # Replace absolute root_dir path with the output_dir symlink for portability
-            sed "s|$root_dir/||g" "$log" > "$log.pretty"
-        fi
-    done
-}
-
 create_output_root_dir() {
     local name_base="$1"
     name="${name_base}_$(date +%Y-%m-%d_%H:%M:%S)"
@@ -113,6 +104,7 @@ create_output_root_dir() {
     # root for remote repos
     root_dir="/home/amund.ersland/git-play-output/$name"
     remote_dir="$root_dir/remotes"
+    mkdir -p $remote_dir
 
     # user workspaces
     mkdir -p "$root_dir/user1"
@@ -133,7 +125,8 @@ create_output_root_dir() {
 
 create_bare_repo() {
     local name="$1"
-    run git init --bare "$remote_dir/$name"
+    run cd $remote_dir
+    run git init --bare $name
 }
 
 make_commit(){
@@ -149,10 +142,11 @@ make_commit(){
     local file="$dir/$(uuidgen | md5sum | cut -c1-4).txt"
     last_added=$(basename $file)
     echo "herp derp" > $file
-    run git -C $repo_path add $file
-    run git -C $repo_path commit -m "$msg, added $last_added to ./files"
+    run cd $repo_path
+    run git add $file
+    run git commit -m "$msg, added $last_added to ./files"
 
-    run git -C $repo_path push
+    run git push
 }
 
 update_superproject_with_submodule(){
@@ -161,28 +155,32 @@ update_superproject_with_submodule(){
     local msg=${3:-update $superproject with current $submodule}
 
     LOG_INFO "## update $(basename $superproject) with current $(basename $submodule)"
-    run git -C "$superproject" add $submodule
-    run git -C "$superproject" commit -m "$msg"
-    run git -C "$superproject" -c protocol.file.allow=always push
+    run cd $superproject
+    run git add $submodule
+    run git commit -m "$msg"
+    run git -c protocol.file.allow=always push
 }
 
 clone(){
     local remote_path=$1
     local local_path=$2
-    run git clone $remote_path "$local_path/$(basename $remote_path)"
+    run cd $local_path
+    run git clone $remote_path
 }
 
 clone_recursive(){
     local remote_path=$1
     local local_path=$2
-    run git -c protocol.file.allow=always clone --recursive $remote_path "$local_path/$(basename $remote_path)"
+    run cd $local_path
+    run git -c protocol.file.allow=always clone --recursive $remote_path
 }
 
 update_recursive(){
     local repo=$1
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
-    run git -C "$repo" pull
-    run git -C "$repo" -c protocol.file.allow=always submodule update --init --recursive
+    run cd $repo
+    run git pull
+    run git -c protocol.file.allow=always submodule update --init --recursive
 }
 
 add_repo_as_submodule(){
@@ -215,10 +213,11 @@ add_repo_as_submodule(){
 
     LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
 
-    run git -C "$superproject" -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
-    run git -C "$superproject" commit -m "Add submodule "$path_to_submodule""
+    cd $superproject
+    run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
+    run git commit -m "Add submodule "$path_to_submodule""
 
-    run git -C "$superproject" -c "protocol.file.allow=always" push
+    run git -c "protocol.file.allow=always" push
 }
 
 INFO(){
