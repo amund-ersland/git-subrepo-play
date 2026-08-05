@@ -244,6 +244,7 @@ add_repo_as_submodule(){
 repo_status() {
     local superproject=$1
     local submodule=$2
+    local strong_title=${3:-"$(realpath $superproject)"}
 
     ensure_dir $superproject
 
@@ -254,16 +255,18 @@ repo_status() {
     )
 
     INFO $LINE
-    INFO "Status of $(basename $superproject) and its submodules"
+
+    INFO "\033[36m$strong_title\033[35m - status of $(basename $superproject) and its submodules"
     for what in "${!what_to_command[@]}"; do
         TEXT "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
     done
 
     INFO "Submodule status"
     TEXT "$(git submodule status)"
+    INFO "$LINE\n"
 }
 
-LINE="$(for i in $(seq 1 80); do printf '='; done)"
+LINE="\n$(for i in $(seq 1 80); do printf '='; done)"
 
 INFO(){
     LOG_INFO "$1"
