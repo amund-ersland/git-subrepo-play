@@ -5,7 +5,9 @@ _PWD=$PWD
 
 source utils/common.sh
 
-LAYERS=3
+TITLE "This script demonstrates updating submodules recursively to get the same commits as pointet to by the superproject"
+
+LAYERS=2
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
 setup_layered_repos $LAYERS "s2"
 

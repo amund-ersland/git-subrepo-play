@@ -316,6 +316,12 @@ PAUSE(){
     read
 }
 
+TITLE(){
+    clear
+    STDOUT_INFO "🥬$1"
+    read -p "press enter to start"
+}
+
 STDOUT_PAUSE(){
     clear
     local msg=$1

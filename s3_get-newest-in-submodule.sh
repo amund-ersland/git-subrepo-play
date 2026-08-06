@@ -5,6 +5,8 @@ _PWD=$PWD
 
 source utils/common.sh
 
+TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit in the branch of the submodule"
+
 LAYERS=3
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
 setup_layered_repos $LAYERS "s3"
