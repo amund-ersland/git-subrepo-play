@@ -5,11 +5,12 @@ _PWD=$PWD
 
 source utils/common.sh
 
-TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit in the branch of the submodule"
+TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
 
 LAYERS=3
+prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
-setup_layered_repos $LAYERS "s3"
+setup_layered_repos $LAYERS $prefix
 
 PAUSE "user1 adds a file to grandchild-repo"
 make_commit "$root_dir/user1/parent-repo/child-repo/grandchild-repo"

@@ -251,6 +251,19 @@ add_repo_as_submodule(){
     run git -c "protocol.file.allow=always" push
 }
 
+checkout(){
+    local repo_path=$1
+    local commit_ish=$2
+    local arg=$3
+
+    ensure_dir $repo_path
+    git checkout $arg $commit_ish
+}
+
+set_current_branch_upstream(){
+    git push -u origin $(git branch --show-current)
+}
+
 repo_status() {
     local superproject=$1
     local submodule=$2
