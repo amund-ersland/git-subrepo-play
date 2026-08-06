@@ -9,10 +9,10 @@ LAYERS=3
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
 setup_layered_repos $LAYERS "s3"
 
-PAUSE "user1 performs a commit to grandchild-repo"
+PAUSE "user1 adds a file to grandchild-repo"
 make_commit "$root_dir/user1/parent-repo/child-repo/grandchild-repo"
 
-PAUSE "user1 performs a commit to child-repo"
+PAUSE "user1 adds a file to child-repo"
 make_commit "$root_dir/user1/parent-repo/child-repo"
 
 PAUSE "user2 pulls all the updates fetching the latest remotes"
