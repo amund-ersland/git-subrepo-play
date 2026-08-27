@@ -29,24 +29,12 @@ print_submodule_active_status "$root_dir/user2/parent-repo" config
 PAUSE "PART A: user2 updates WITHOUT --init -> active flag is honored, child-repo-2 is skipped"
 update_remote_recursive_no_init $root_dir/user2/parent-repo
 
-for u in 1 2; do
-    for c in 1 2; do
-        repo_status $root_dir/user$u/parent-repo \
-            child-repo-$c \
-            "user$u child-repo-$c"
-    done
-done
+print_repo_statuses $LAYERS $REPOS_PER_LAYER
 
 PAUSE "PART B: user2 updates WITH --init -> --init re-activates child-repo-2 and updates it"
 update_remote_recursive $root_dir/user2/parent-repo
 print_submodule_active_status "$root_dir/user2/parent-repo" config
 
-for u in 1 2; do
-    for c in 1 2; do
-        repo_status $root_dir/user$u/parent-repo \
-            child-repo-$c \
-            "user$u child-repo-$c"
-    done
-done
+print_repo_statuses $LAYERS $REPOS_PER_LAYER
 
 cd $_PWD
