@@ -1,6 +1,5 @@
 commit_file(){
     local repo_path=$1
-    repo_path=$(relpath $repo_path)
     local msg=${2:-""}
 
     ensure_dir $repo_path
@@ -17,6 +16,17 @@ commit_file(){
     run git add $file
     run git commit -m "\"${msg}add $last_added\""
 
+    run git push
+}
+
+commit_gitmodules(){
+    local repo_path=$1
+    local msg=${2:-"update .gitmodules"}
+
+    ensure_dir $repo_path
+    run git add .gitmodules
+    run git commit -m "\"$msg\""
+    
     run git push
 }
 
@@ -62,6 +72,12 @@ update_recursive_base(){
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
     ensure_dir $repo
     run git pull
+}
+
+#===============================================================================
+update_recursive(){
+    update_recursive_base $1
+    run git -c protocol.file.allow=always submodule update --recursive
 }
 
 #===============================================================================
@@ -168,7 +184,7 @@ set_submodule_status(){
     ensure_dir $superproject
     local flag=false
 
-    if [[ status == "active" ]]; then
+    if [[ $status == "active" ]]; then
         flag=true
     fi
  

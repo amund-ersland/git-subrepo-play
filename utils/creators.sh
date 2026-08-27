@@ -2,7 +2,8 @@ setup_layered_repos(){
     local name_base=${1:-""}
     local layers=$2
     local repos_per_layer=${3:-1}
-    
+    local extra=$4
+
     create_output_root_dir $name_base
 
     create_bare_repo "parent-repo"
@@ -95,7 +96,9 @@ setup_layered_repos(){
         fi
     fi
 
-    clone_recursive $remote_dir/parent-repo $root_dir/user2
+    if [[ $extra != "skip-user2" ]]; then
+        clone_recursive $remote_dir/parent-repo $root_dir/user2
+    fi
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"
 
@@ -108,10 +111,12 @@ setup_layered_repos(){
     STDOUT_INFO "👤 User 1 workspace structure:"
     tree "$root_dir/user1"
 
-    echo -e ""
-    STDOUT_INFO $LINE
-    STDOUT_INFO "👤 User 2 workspace structure:"
-    tree "$root_dir/user2"
+    if [[ $extra != "skip-user2" ]]; then
+        echo -e ""
+        STDOUT_INFO $LINE
+        STDOUT_INFO "👤 User 2 workspace structure:"
+        tree "$root_dir/user2"
+    fi
 }
 
 #===============================================================================
