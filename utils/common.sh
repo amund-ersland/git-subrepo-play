@@ -76,11 +76,13 @@ setup_layered_repos(){
 }
 
 create_output_root_dir() {
+    source config.conf
+
     local name_base="$1"
-    name="${name_base}_$(date +%Y-%m-%d_%H:%M:%S)"
+    name="${name_base}_$(date "$CONF_TIMESTAMP_FORMAT")"
 
     # root for remote repos
-    root_dir="/home/amund.ersland/git-play-output/$name"
+    root_dir="$CONF_OUTPUT_DIR/$name"
     remote_dir="$root_dir/remotes"
     mkdir -p $remote_dir
 
