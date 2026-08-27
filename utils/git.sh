@@ -157,3 +157,13 @@ repo_status() {
     TEXT "$(git submodule status)"
     INFO "$LINE\n"
 }
+
+#===============================================================================
+set_submodule_to_inactive(){
+    local superproject=$1
+    local submodule=$2
+
+    ensure_dir $superproject
+
+    run git config submodule.$submodule.active false
+}
