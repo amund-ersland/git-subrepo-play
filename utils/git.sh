@@ -20,6 +20,7 @@ make_commit(){
     run git push
 }
 
+#===============================================================================
 update_superproject_with_submodule(){
     superproject=$1
     submodule=$2
@@ -33,6 +34,7 @@ update_superproject_with_submodule(){
     run git -c protocol.file.allow=always push
 }
 
+#===============================================================================
 clone(){
     local remote_path=$1
     local local_path=$2
@@ -43,6 +45,7 @@ clone(){
     run git clone $remote_path
 }
 
+#===============================================================================
 clone_recursive(){
     local remote_path=$1
     local local_path=$2
@@ -53,6 +56,7 @@ clone_recursive(){
     run git -c protocol.file.allow=always clone --recursive $remote_path
 }
 
+#===============================================================================
 update_recursive_base(){
     local repo=$(relpath $1)
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
@@ -60,16 +64,19 @@ update_recursive_base(){
     run git pull
 }
 
+#===============================================================================
 update_init_recursive(){
     update_recursive_base $1
     run git -c protocol.file.allow=always submodule update --init --recursive
 }
 
+#===============================================================================
 update_remote_recursive(){
     update_recursive_base $1
     run git -c protocol.file.allow=always submodule update --remote --init --recursive
 }
 
+#===============================================================================
 add_repo_as_submodule(){
     local superproject=""
     local child_remote=""
@@ -108,6 +115,7 @@ add_repo_as_submodule(){
     run git -c "protocol.file.allow=always" push
 }
 
+#===============================================================================
 checkout(){
     local repo_path=$1
     local commit_ish=$2
@@ -117,10 +125,12 @@ checkout(){
     git checkout $arg $commit_ish
 }
 
+#===============================================================================
 set_current_branch_upstream(){
     git push -u origin $(git branch --show-current)
 }
 
+#===============================================================================
 repo_status() {
     local superproject=$1
     local submodule=$2
