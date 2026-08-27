@@ -93,6 +93,14 @@ update_remote_recursive(){
 }
 
 #===============================================================================
+# Like update_remote_recursive but without --init, so submodule.<name>.active=false
+# is honored instead of being re-activated by --init.
+update_remote_recursive_no_init(){
+    update_recursive_base $1
+    run git -c protocol.file.allow=always submodule update --remote --recursive
+}
+
+#===============================================================================
 add_repo_as_submodule(){
     local superproject=""
     local child_remote=""
