@@ -175,6 +175,7 @@ repo_submodule_active_status(){
 
     ensure_dir $superproject
 
-    INFO "active submodules \033[0m (git config --get-regexp '^submodule\..*\.active$')"
-    TEXT "$(git config --get-regexp '^submodule\..*\.active$')"
+    local status_cmd="git config --get-regexp '^submodule\..*\.active$'"
+    INFO "active submodules \033[0m ($status_cmd)"
+    TEXT "$(eval $status_cmd)"
 }
