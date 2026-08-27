@@ -1,7 +1,8 @@
 setup_layered_repos(){
-    local levels=$1
-    local repos_per_layer=${2:-1}
-    local name_base=${3:-""}
+    local name_base=${1:-""}
+    local layers=$2
+    local repos_per_layer=${3:-1}
+    
     create_output_root_dir $name_base
 
     create_bare_repo "parent-repo"
@@ -30,7 +31,7 @@ setup_layered_repos(){
         done
     fi
 
-    if [[ $levels -ge 3 ]]; then
+    if [[ $layers -ge 3 ]]; then
         # Setup each grandchild with initial commit
         if [[ $repos_per_layer -eq 1 ]]; then
             create_bare_repo "grandchild-repo"
@@ -62,7 +63,7 @@ setup_layered_repos(){
         done
     fi
 
-    if [[ $levels -ge 3 ]]; then
+    if [[ $layers -ge 3 ]]; then
         # Add grandchild repos as submodules to each child
         if [[ $repos_per_layer -eq 1 ]]; then
             add_repo_as_submodule \

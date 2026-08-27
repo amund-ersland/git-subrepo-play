@@ -12,7 +12,7 @@ TITLE "This script demonstrates updating submodules recursively to get the same 
 LAYERS=2
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
-setup_layered_repos $LAYERS 1 $prefix
+setup_layered_repos $prefix $LAYERS
 
 PAUSE "user1 adds a file to child repo"
 make_commit "$root_dir/user1/parent-repo/child-repo"
