@@ -16,8 +16,20 @@ STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
 setup_layered_repos $prefix $LAYERS $REPOS_PER_LAYER
 
 PAUSE "user1 sets child-repo-2 to inactive"
-set_submodule_to_inactive "$root_dir/user1/parent-repo" child-repo-2
-repo_submodule_active_status "$root_dir/user1/parent-repo" 
+set_submodule_status "$root_dir/user1/parent-repo" child-repo-2 inactive
+print_submodule_active_status "$root_dir/user1/parent-repo"
+
+#PAUSE "user1 sets child-repo-2 to inactive"
+#set_submodule_to_inactive "$root_dir/user1/parent-repo" child-repo-2
+#repo_submodulelocal_active_status "$root_dir/user1/parent-repo"
+#
+#PAUSE "user1 makes a commit in child-repo-1 and 2"
+#for i in 1 2; do 
+#    make_commit "$root_dir/user1/parent-repo/child-repo-$i"
+#done
+
+#PAUSE "user2 pulls all the updates fetching the latest remotes"
+#update_remote_recursive $root_dir/user2/parent-repo
 
 
 

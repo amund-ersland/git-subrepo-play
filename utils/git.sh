@@ -159,23 +159,41 @@ repo_status() {
 }
 
 #===============================================================================
-set_submodule_to_inactive(){
+set_submodule_status(){
     local superproject=$1
     local submodule=$2
+    local status=$3
+    local where=${4:-"gitmodules"}
 
     ensure_dir $superproject
+    local flag=false
 
-    run git config submodule.$submodule.active false
+    if [[ status == "active" ]]; then
+        flag=true
+    fi
+ 
+    if [[ $where == "gitmodules" ]]; then
+        run git config -f .gitmodules submodule.$submodule.active $flag
+    else [[ $where == "config" ]] 
+        run git config submodule.$submodule.active $flag
+    fi
 }
 
 #===============================================================================
-repo_submodule_active_status(){
+print_submodule_active_status(){
     local superproject=$1
-    local strong_title=${2:-"$(realpath $superproject)"}
+    local where=${2:-"gitmodules"}
+    
+    local strong_title="$(realpath $superproject)"
 
     ensure_dir $superproject
 
-    local status_cmd="git config --get-regexp '^submodule\..*\.active$'"
+    if [[ $where == "gitmodules" ]]; then
+        status_cmd="git config -f .gitmodules --get-regexp '^submodule\..*\.active$'"
+    else
+        status_cmd="git config --get-regexp '^submodule\..*\.active$'"
+    fi
+    
     INFO "active submodules \033[0m ($status_cmd)"
     TEXT "$(eval $status_cmd)"
 }

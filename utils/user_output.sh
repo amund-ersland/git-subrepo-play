@@ -59,7 +59,7 @@ PAUSE(){
     read -p "press enter to continue"
     clear
     local msg=$1
-    INFO "💡 $msg"
+    INFO "💡 $msg\n"
     read
 }
 
