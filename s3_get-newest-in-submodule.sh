@@ -3,7 +3,9 @@ set -eo pipefail
 
 _PWD=$PWD
 
-source utils/common.sh
+for u in utils/*; do
+    source $u
+done
 
 TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
 

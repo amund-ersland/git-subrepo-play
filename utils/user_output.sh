@@ -1,0 +1,68 @@
+run() {
+    echo "$*" | tee -a "$CMD_LOG"
+    {
+        echo
+        echo "$ $*"
+
+        "$@"
+        rc=$?
+
+        if [[ $rc -ne 0 ]]; then
+            echo "[exit code: $rc]"
+        fi
+
+    } >> "$FULL_LOG" 2>&1
+
+    return $rc
+}
+
+LINE="\n$(for i in $(seq 1 80); do printf '='; done)"
+
+INFO(){
+    LOG_INFO "$1"
+    STDOUT_INFO "$1"
+}
+
+LOG_INFO(){
+    printf "\n\033[35m$1\033[0m" >> $CMD_LOG
+    printf "\n\033[35m$1\033[0m" >> $FULL_LOG
+}
+
+STDOUT_INFO(){
+    echo -e "\033[35m$1\033[0m"
+}
+
+TEXT(){
+    LOG_TEXT "$1"
+    STDOUT_TEXT "$1"
+}
+
+LOG_TEXT(){
+    printf "\n$1" >> $CMD_LOG
+    printf "\n$1" >> $FULL_LOG
+}
+
+STDOUT_TEXT(){
+    echo -e "$1"
+}
+
+PAUSE(){
+    read -p "press enter to continue"
+    clear
+    local msg=$1
+    INFO "💡 $msg"
+    read
+}
+
+TITLE(){
+    clear
+    STDOUT_INFO "🥬$1"
+    read -p "press enter to start"
+}
+
+STDOUT_PAUSE(){
+    clear
+    local msg=$1
+    STDOUT_INFO "💡 $msg"
+    read
+}

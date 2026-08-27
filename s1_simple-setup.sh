@@ -1,7 +1,9 @@
 #!/bin/bash
 set -eo pipefail
 
-source utils/common.sh
+for u in utils/*; do
+    source $u
+done
 
 LAYERS=2
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"

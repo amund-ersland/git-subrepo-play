@@ -3,7 +3,9 @@ set -eo pipefail
 
 _PWD=$PWD
 
-source utils/common.sh
+for u in utils/*; do
+    source $u
+done
 
 TITLE "This script demonstrates updating submodules recursively to get the same commits as pointet to by the superproject"
 

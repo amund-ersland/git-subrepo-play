@@ -1,0 +1,149 @@
+make_commit(){
+    local repo_path=$1
+    repo_path=$(relpath $repo_path)
+    local msg=${2:-""}
+
+    ensure_dir $repo_path
+    local dir=files
+
+    if [[ ! -d $dir ]]; then
+        run mkdir -p $dir
+    fi
+
+    local file="$dir/$(uuidgen | md5sum | cut -c1-4).txt"
+    last_added=$(basename $file)
+    TEXT "echo \"herp derp\" > $file"
+    echo "herp derp" > $file
+    run git add $file
+    run git commit -m "\"${msg}add $last_added\""
+
+    run git push
+}
+
+update_superproject_with_submodule(){
+    superproject=$1
+    submodule=$2
+
+    local msg="update $(basename $superproject) with current $submodule"
+    LOG_INFO "## $msg"
+
+    ensure_dir $superproject
+    run git add $submodule
+    run git commit -m "\"$msg\""
+    run git -c protocol.file.allow=always push
+}
+
+clone(){
+    local remote_path=$1
+    local local_path=$2
+    ensure_dir $local_path
+    remote_path=$(realpath $remote_path)
+    local_path=$(realpath $local_path)
+
+    run git clone $remote_path
+}
+
+clone_recursive(){
+    local remote_path=$1
+    local local_path=$2
+    ensure_dir $local_path
+    remote_path=$(realpath $remote_path)
+    local_path=$(realpath $local_path)
+
+    run git -c protocol.file.allow=always clone --recursive $remote_path
+}
+
+update_recursive_base(){
+    local repo=$(relpath $1)
+    LOG_INFO "## pull changes in superproject and update submodules in $repo"
+    ensure_dir $repo
+    run git pull
+}
+
+update_init_recursive(){
+    update_recursive_base $1
+    run git -c protocol.file.allow=always submodule update --init --recursive
+}
+
+update_remote_recursive(){
+    update_recursive_base $1
+    run git -c protocol.file.allow=always submodule update --remote --init --recursive
+}
+
+add_repo_as_submodule(){
+    local superproject=""
+    local child_remote=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --superproject)
+                superproject=$2
+                shift 2
+                ;;
+            --child_remote)
+                child_remote=$2
+                shift 2
+                ;;
+            *)
+                echo -e "\033[31munknown argument $1"
+                return 1
+                ;;
+        esac
+    done
+
+    if [[ -z "$child_remote" || -z "$superproject" ]]; then
+        echo -e "\033[31mMissing required arguments: --superproject and/or --child_remote"
+        return 1
+    fi
+
+    local path_to_submodule=$(basename "$child_remote")
+
+    LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
+
+    superproject=$(relpath $superproject)
+    run cd $superproject
+    run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
+    run git commit -m "\"Add submodule "$path_to_submodule"\""
+
+    run git -c "protocol.file.allow=always" push
+}
+
+checkout(){
+    local repo_path=$1
+    local commit_ish=$2
+    local arg=$3
+
+    ensure_dir $repo_path
+    git checkout $arg $commit_ish
+}
+
+set_current_branch_upstream(){
+    git push -u origin $(git branch --show-current)
+}
+
+repo_status() {
+    local superproject=$1
+    local submodule=$2
+    local strong_title=${3:-"$(realpath $superproject)"}
+
+    ensure_dir $superproject
+
+    declare -A what_to_command=(
+        [submodule current sha]="git -C $submodule rev-parse --short HEAD"
+        [submodule tracked sha]="git ls-tree HEAD $submodule | head -1 | cut -d' ' -f3 | cut -c1-7"
+        [superproject sha     ]="git rev-parse --short HEAD"
+    )
+
+    INFO $LINE
+
+    INFO "\033[36m$strong_title\033[35m - status of $(basename $superproject) and its submodules"
+    TEXT "\nDescription           | sha     | command to run "
+    TEXT "----------------------|---------|----------------"
+    for what in "${!what_to_command[@]}"; do
+        TEXT "$what | $(eval ${what_to_command[$what]}) | ${what_to_command[$what]}"
+    done
+
+    INFO "\nSubmodule status \033[0m (git submodule status)"
+    TEXT "$(git submodule status)"
+    INFO "$LINE\n"
+}
