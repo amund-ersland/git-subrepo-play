@@ -5,57 +5,93 @@ setup_layered_repos(){
     create_output_root_dir $name_base
 
     create_bare_repo "parent-repo"
-    for i in $(seq 1 $repos_per_layer); do
-        create_bare_repo "child-repo-$i"
-    done
+    if [[ $repos_per_layer -eq 1 ]]; then
+        create_bare_repo "child-repo"
+    else
+        for i in $(seq 1 $repos_per_layer); do
+            create_bare_repo "child-repo-$i"
+        done
+    fi
 
     # Setup user1 parent
     clone $remote_dir/parent-repo $root_dir/user1
     make_commit $root_dir/user1/parent-repo
 
     # Setup each child with initial commit (footnote 1)
-    for i in $(seq 1 $repos_per_layer); do
-        clone $remote_dir/child-repo-$i $root_dir/user1
-        make_commit $root_dir/user1/child-repo-$i
-        run rm -rf $root_dir/user1/child-repo-$i
-    done
-
-    if [[ $levels -ge 3 ]]; then
-        # Setup each grandchild with initial commit
+    if [[ $repos_per_layer -eq 1 ]]; then
+        clone $remote_dir/child-repo $root_dir/user1
+        make_commit $root_dir/user1/child-repo
+        run rm -rf $root_dir/user1/child-repo
+    else
         for i in $(seq 1 $repos_per_layer); do
-            for j in $(seq 1 $repos_per_layer); do
-                create_bare_repo "grandchild-repo-$i-$j"
-                clone $remote_dir/grandchild-repo-$i-$j $root_dir/user1
-                make_commit $root_dir/user1/grandchild-repo-$i-$j
-                run rm -rf $root_dir/user1/grandchild-repo-$i-$j
-            done
+            clone $remote_dir/child-repo-$i $root_dir/user1
+            make_commit $root_dir/user1/child-repo-$i
+            run rm -rf $root_dir/user1/child-repo-$i
         done
     fi
 
+    if [[ $levels -ge 3 ]]; then
+        # Setup each grandchild with initial commit
+        if [[ $repos_per_layer -eq 1 ]]; then
+            create_bare_repo "grandchild-repo"
+            clone $remote_dir/grandchild-repo $root_dir/user1
+            make_commit $root_dir/user1/grandchild-repo
+            run rm -rf $root_dir/user1/grandchild-repo
+        else
+            for i in $(seq 1 $repos_per_layer); do
+                for j in $(seq 1 $repos_per_layer); do
+                    create_bare_repo "grandchild-repo-$i-$j"
+                    clone $remote_dir/grandchild-repo-$i-$j $root_dir/user1
+                    make_commit $root_dir/user1/grandchild-repo-$i-$j
+                    run rm -rf $root_dir/user1/grandchild-repo-$i-$j
+                done
+            done
+        fi
+    fi
+
     # Add child repos as submodules to parent
-    for i in $(seq 1 $repos_per_layer); do
+    if [[ $repos_per_layer -eq 1 ]]; then
         add_repo_as_submodule \
             --superproject "$root_dir/user1/parent-repo" \
-            --child_remote "$remote_dir/child-repo-$i"
-    done
+            --child_remote "$remote_dir/child-repo"
+    else
+        for i in $(seq 1 $repos_per_layer); do
+            add_repo_as_submodule \
+                --superproject "$root_dir/user1/parent-repo" \
+                --child_remote "$remote_dir/child-repo-$i"
+        done
+    fi
 
     if [[ $levels -ge 3 ]]; then
         # Add grandchild repos as submodules to each child
-        for i in $(seq 1 $repos_per_layer); do
-            for j in $(seq 1 $repos_per_layer); do
-                add_repo_as_submodule \
-                    --superproject "$root_dir/user1/parent-repo/child-repo-$i" \
-                    --child_remote "$remote_dir/grandchild-repo-$i-$j"
+        if [[ $repos_per_layer -eq 1 ]]; then
+            add_repo_as_submodule \
+                --superproject "$root_dir/user1/parent-repo/child-repo" \
+                --child_remote "$remote_dir/grandchild-repo"
+        else
+            for i in $(seq 1 $repos_per_layer); do
+                for j in $(seq 1 $repos_per_layer); do
+                    add_repo_as_submodule \
+                        --superproject "$root_dir/user1/parent-repo/child-repo-$i" \
+                        --child_remote "$remote_dir/grandchild-repo-$i-$j"
+                done
             done
-        done
+        fi
 
         # Update parent to record each child's new commit (now containing grandchild submodules)
-        for i in $(seq 1 $repos_per_layer); do
+        if [[ $repos_per_layer -eq 1 ]]; then
             update_superproject_with_submodule \
                 "$root_dir/user1/parent-repo" \
-                "child-repo-$i" \
-                "Update child-repo-$i submodule to include grandchild submodules"
-        done
+                "child-repo" \
+                "Update child-repo submodule to include grandchild submodules"
+        else
+            for i in $(seq 1 $repos_per_layer); do
+                update_superproject_with_submodule \
+                    "$root_dir/user1/parent-repo" \
+                    "child-repo-$i" \
+                    "Update child-repo-$i submodule to include grandchild submodules"
+            done
+        fi
     fi
 
     clone_recursive $remote_dir/parent-repo $root_dir/user2
