@@ -1,4 +1,4 @@
-make_commit(){
+commit_file(){
     local repo_path=$1
     repo_path=$(relpath $repo_path)
     local msg=${2:-""}

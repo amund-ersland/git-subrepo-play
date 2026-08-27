@@ -25,7 +25,7 @@ print_submodule_active_status "$root_dir/user1/parent-repo"
 #
 #PAUSE "user1 makes a commit in child-repo-1 and 2"
 #for i in 1 2; do 
-#    make_commit "$root_dir/user1/parent-repo/child-repo-$i"
+#    commit_file "$root_dir/user1/parent-repo/child-repo-$i"
 #done
 
 #PAUSE "user2 pulls all the updates fetching the latest remotes"
@@ -35,10 +35,10 @@ print_submodule_active_status "$root_dir/user1/parent-repo"
 
 
 
-#make_commit "$root_dir/user1/parent-repo/child-repo/grandchild-repo"
+#commit_file "$root_dir/user1/parent-repo/child-repo/grandchild-repo"
 #
 #PAUSE "user1 adds a file to child-repo"
-#make_commit "$root_dir/user1/parent-repo/child-repo"
+#commit_file "$root_dir/user1/parent-repo/child-repo"
 #
 #PAUSE "user2 pulls all the updates fetching the latest remotes"
 #update_remote_recursive $root_dir/user2/parent-repo

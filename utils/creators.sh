@@ -16,17 +16,17 @@ setup_layered_repos(){
 
     # Setup user1 parent
     clone $remote_dir/parent-repo $root_dir/user1
-    make_commit $root_dir/user1/parent-repo
+    commit_file $root_dir/user1/parent-repo
 
     # Setup each child with initial commit (footnote 1)
     if [[ $repos_per_layer -eq 1 ]]; then
         clone $remote_dir/child-repo $root_dir/user1
-        make_commit $root_dir/user1/child-repo
+        commit_file $root_dir/user1/child-repo
         run rm -rf $root_dir/user1/child-repo
     else
         for i in $(seq 1 $repos_per_layer); do
             clone $remote_dir/child-repo-$i $root_dir/user1
-            make_commit $root_dir/user1/child-repo-$i
+            commit_file $root_dir/user1/child-repo-$i
             run rm -rf $root_dir/user1/child-repo-$i
         done
     fi
@@ -36,14 +36,14 @@ setup_layered_repos(){
         if [[ $repos_per_layer -eq 1 ]]; then
             create_bare_repo "grandchild-repo"
             clone $remote_dir/grandchild-repo $root_dir/user1
-            make_commit $root_dir/user1/grandchild-repo
+            commit_file $root_dir/user1/grandchild-repo
             run rm -rf $root_dir/user1/grandchild-repo
         else
             for i in $(seq 1 $repos_per_layer); do
                 for j in $(seq 1 $repos_per_layer); do
                     create_bare_repo "grandchild-repo-$i-$j"
                     clone $remote_dir/grandchild-repo-$i-$j $root_dir/user1
-                    make_commit $root_dir/user1/grandchild-repo-$i-$j
+                    commit_file $root_dir/user1/grandchild-repo-$i-$j
                     run rm -rf $root_dir/user1/grandchild-repo-$i-$j
                 done
             done
