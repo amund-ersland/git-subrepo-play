@@ -15,7 +15,14 @@ prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
 setup_layered_repos $prefix $LAYERS $REPOS_PER_LAYER
 
-#PAUSE "user1 adds a file to grandchild-repo"
+PAUSE "user1 sets child-repo-2 to inactive"
+set_submodule_to_inactive "$root_dir/user1/parent-repo" child-repo-2
+repo_submodule_active_status "$root_dir/user1/parent-repo" 
+
+
+
+
+
 #make_commit "$root_dir/user1/parent-repo/child-repo/grandchild-repo"
 #
 #PAUSE "user1 adds a file to child-repo"

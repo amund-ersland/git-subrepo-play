@@ -167,3 +167,14 @@ set_submodule_to_inactive(){
 
     run git config submodule.$submodule.active false
 }
+
+#===============================================================================
+repo_submodule_active_status(){
+    local superproject=$1
+    local strong_title=${2:-"$(realpath $superproject)"}
+
+    ensure_dir $superproject
+
+    INFO "active submodules \033[0m (git config --get-regexp '^submodule\..*\.active$')"
+    TEXT "$(git config --get-regexp '^submodule\..*\.active$')"
+}
