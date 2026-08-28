@@ -14,9 +14,11 @@ parse_args "$@"
 # start script
 TITLE "This script demonstrates the setup of a nested repo and cloning for a second user"
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
+
+STEP "Set up a nested repo hierarchy in $LAYERS layers and clone it for user2"
 create_submodule_hierarchy $prefix $LAYERS
 
-PAUSE "🧪 Run tests"
+STEP "🧪 Run tests"
 
 INFO "🧪 TEST: parent-repo of user1 vs user2 → should be EQUAL, because user2 cloned the same parent-repo remote that user1 pushed, so both point at the same superproject commit."
 assert_sha_equal "$root_dir/user1/parent-repo" "$root_dir/user2/parent-repo"

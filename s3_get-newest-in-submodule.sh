@@ -15,25 +15,25 @@ parse_args "$@"
 TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
 
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
-STDOUT_PAUSE "Setup repos in $LAYERS layers"
+STEP "Set up repos in $LAYERS layers"
 create_submodule_hierarchy $prefix $LAYERS
 
-PAUSE "user1 adds a file to grandchild-repo"
+STEP "user1 adds a file to grandchild-repo"
 add_random_file_and_push "$root_dir/user1/parent-repo/child-repo/grandchild-repo"
 
-PAUSE "user1 adds a file to child-repo"
+STEP "user1 adds a file to child-repo"
 add_random_file_and_push "$root_dir/user1/parent-repo/child-repo"
 
-PAUSE "user2 pulls all the updates fetching the latest remotes"
+STEP "user2 pulls all the updates fetching the latest remotes"
 update_submodules $root_dir/user2/parent-repo --remote
 
-PAUSE "Print status for user 1 and 2 for the repos"
+STEP "Print status for user 1 and 2 for the repos"
 print_repo_status $root_dir/user1/parent-repo child-repo user1
 print_repo_status $root_dir/user2/parent-repo child-repo user2
 print_repo_status $root_dir/user1/parent-repo/child-repo grandchild-repo user1
 print_repo_status $root_dir/user2/parent-repo/child-repo grandchild-repo user2
 
-PAUSE "🧪 Run tests"
+STEP "🧪 Run tests"
 
 INFO "🧪 TEST: child-repo of user1 vs user2 → should be EQUAL, because user2 ran 'submodule update --remote --recursive', which fetches and checks out the newest commit on the submodule's remote branch — the same commit user1 just pushed."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo" "$root_dir/user2/parent-repo/child-repo"

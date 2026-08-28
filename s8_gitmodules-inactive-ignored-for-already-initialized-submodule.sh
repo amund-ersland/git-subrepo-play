@@ -16,33 +16,33 @@ parse_args "$@"
 # start script
 TITLE "This script shows that pushing active=false in .gitmodules does NOT retroactively deactivate a submodule a colleague has ALREADY initialized. user2 cloned recursively (so child-repo-2 has a url in local config), then user1 pushes active=false in .gitmodules. Even with a plain 'submodule update --remote' (no --init), git still updates child-repo-2, because a set url (active rule 3) keeps it active and the .gitmodules active flag is not consulted for initialized submodules. Contrast with s5, where the flag lives in LOCAL config and IS honored."
 
-STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each (user2 clones recursively up front, so both children start initialized with a url in local config)"
+STEP "Set up repos in $LAYERS layers with $REPOS_PER_LAYER in each (user2 clones recursively up front, so both children start initialized with a url in local config)"
 
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 create_submodule_hierarchy $prefix $LAYERS $REPOS_PER_LAYER
 
-PAUSE "user1 sets child-repo-2 to inactive in .gitmodules and pushes it to the team"
+STEP "user1 sets child-repo-2 to inactive in .gitmodules and pushes it to the team"
 set_submodule_active "$root_dir/user1/parent-repo" child-repo-2 inactive
 print_submodule_active_flags "$root_dir/user1/parent-repo"
 commit_push_gitmodules "$root_dir/user1/parent-repo"
 
-PAUSE "user1 advances BOTH child repos with a new commit each"
+STEP "user1 advances BOTH child repos with a new commit each"
 for c in 1 2; do
     add_random_file_and_push "$root_dir/user1/parent-repo/child-repo-$c"
 done
 
-PAUSE "user2 updates submodules to newest remote WITHOUT --init, expecting the .gitmodules flag to protect child-repo-2"
+STEP "user2 updates submodules to newest remote WITHOUT --init, expecting the .gitmodules flag to protect child-repo-2"
 update_submodules $root_dir/user2/parent-repo --remote
 
-PAUSE "Show that user2 still has child-repo-2 active in LOCAL config (url set) — .gitmodules active=false never landed here"
+STEP "Show that user2 still has child-repo-2 active in LOCAL config (url set) — .gitmodules active=false never landed here"
 print_submodule_active_flags "$root_dir/user2/parent-repo" "gitmodules"
 STDOUT_INFO "local submodule config (note child-repo-2.url is present => active by rule 3):"
 TEXT "$(cd $root_dir/user2/parent-repo && git config --local --get-regexp '^submodule\.')"
-PAUSE "Print status for user 1 and 2 for the repos"
 
+STEP "Print status for user 1 and 2 for the repos"
 print_repo_statuses $NUM_USERS $REPOS_PER_LAYER
 
-PAUSE "🧪 Run tests"
+STEP "🧪 Run tests"
 
 INFO "🧪 TEST: child-repo-1 of user1 vs user2 → should be EQUAL. child-repo-1 stayed active, so 'submodule update --remote' fetched and checked out the newest commit user1 pushed."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/parent-repo/child-repo-1"

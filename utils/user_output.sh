@@ -67,18 +67,12 @@ parse_args(){
 }
 
 #===============================================================================
+# TITLE introduces a scenario. It clears the screen, prints the overview and
+# waits for the user to start. It also resets the step counter so the first
+# STEP does not wait for a (non-existent) previous step.
 # Pass -s / --skip-pause to a scenario script to run non-interactively.
-PAUSE(){
-    local msg=$1
-    if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
-        read -p "↵  press enter to continue..."
-        clear
-    fi
-    INFO "💡 $msg"
-}
-
-#===============================================================================
 TITLE(){
+    _STEP_STARTED=false
     clear
     STDOUT_INFO "🥬 $1"
     if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
@@ -87,12 +81,39 @@ TITLE(){
 }
 
 #===============================================================================
-STDOUT_PAUSE(){
-    clear
+# STEP is the primary interaction primitive for scenarios. Every step:
+#   1. waits for the user to finish reading the PREVIOUS step's output
+#      (skipped for the very first step after a TITLE)
+#   2. clears the terminal
+#   3. prints what this step is about to do
+#   4. waits for the user to press enter before the commands below it run
+#
+# So the commands and their status output always appear directly under the
+# description of what they do, and the user is in control of the pace.
+# Pass -s / --skip-pause to a scenario script to run non-interactively.
+STEP(){
     local msg=$1
-    STDOUT_INFO "💡 $msg"
+
+    # 1. Let the user review the previous step before we wipe the screen.
+    if [[ "${SKIP_PAUSE:-false}" != "true" && "${_STEP_STARTED:-false}" == "true" ]]; then
+        read -p "↵  press enter for the next step..."
+    fi
+    _STEP_STARTED=true
+
+    # 2. + 3. Fresh screen, then announce what is about to happen.
+    clear
+    # Logs may not exist yet on the very first (setup) step, so fall back to
+    # stdout-only until CMD_LOG/FULL_LOG have been created.
+    if [[ -n "${CMD_LOG:-}" ]]; then
+        INFO "💡 $msg"
+    else
+        STDOUT_INFO "💡 $msg"
+    fi
+
+    # 4. Wait for the go-ahead, then the caller's commands run.
     if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
-        read
+        read -p "↵  press enter to run this step..."
+        echo
     fi
 }
 

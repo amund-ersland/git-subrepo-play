@@ -17,28 +17,28 @@ parse_args "$@"
 TITLE "This script demonstrates the use of inactive flag in local gitconfig to skip updating a repo"
 
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
-STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
+STEP "Set up repos in $LAYERS layers with $REPOS_PER_LAYER in each"
 create_submodule_hierarchy $prefix $LAYERS $REPOS_PER_LAYER "skip-user2"
 
-PAUSE "user2 clones the repo recursively so both children start active and checked out"
+STEP "user2 clones the repo recursively so both children start active and checked out"
 clone_repo $remote_dir/parent-repo $root_dir/user2 --recursive
 
-PAUSE "user1 advances both child repos with a new commit each"
+STEP "user1 advances both child repos with a new commit each"
 for c in 1 2; do
     add_random_file_and_push "$root_dir/user1/parent-repo/child-repo-$c"
 done
 
-PAUSE "user2 sets child-repo-2 to inactive in LOCAL git config (not .gitmodules)"
+STEP "user2 sets child-repo-2 to inactive in LOCAL git config (not .gitmodules)"
 set_submodule_active $root_dir/user2/parent-repo child-repo-2 inactive config
 print_submodule_active_flags "$root_dir/user2/parent-repo" "config"
 
-PAUSE "user2 updates submodules to newest remote WITHOUT --init so the inactive flag is honored"
+STEP "user2 updates submodules to newest remote WITHOUT --init so the inactive flag is honored"
 update_submodules $root_dir/user2/parent-repo --remote
-PAUSE "Print status for user 1 and 2 for the repos"
 
+STEP "Print status for user 1 and 2 for the repos"
 print_repo_statuses $NUM_USERS $REPOS_PER_LAYER
 
-PAUSE "🧪 Run tests"
+STEP "🧪 Run tests"
 
 INFO "🧪 TEST: child-repo-1 of user1 vs user2 → should be EQUAL. child-repo-1 stayed active, so 'submodule update --remote --recursive' fetched and checked out the newest commit user1 pushed."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/parent-repo/child-repo-1"

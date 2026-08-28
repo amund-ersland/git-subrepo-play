@@ -16,34 +16,34 @@ parse_args "$@"
 # start script
 TITLE "This script busts a common misconception: setting active=false in .gitmodules does NOT stop colleagues from getting a submodule. A plain 'git clone --recurse-submodules' is documented as equivalent to 'submodule update --init --recursive' and sets submodule.active='.', so it re-activates and checks out every submodule anyway."
 
-STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
+STEP "Set up repos in $LAYERS layers with $REPOS_PER_LAYER in each"
 
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 create_submodule_hierarchy $prefix $LAYERS $REPOS_PER_LAYER "skip-user2"
 
-PAUSE "user1 makes a commit in child-repo-1 and 2"
+STEP "user1 makes a commit in child-repo-1 and 2"
 superproject="$root_dir/user1/parent-repo"
 for c in 1 2; do
     add_random_file_and_push "$superproject/child-repo-$c"
     update_superproject_with_submodule "$superproject" "child-repo-$c"
 done
 
-PAUSE "user1 sets child-repo-2 to inactive in .gitmodules, hoping others won't get it"
+STEP "user1 sets child-repo-2 to inactive in .gitmodules, hoping others won't get it"
 set_submodule_active "$root_dir/user1/parent-repo" child-repo-2 inactive
 print_submodule_active_flags "$root_dir/user1/parent-repo"
 
-PAUSE "user1 commits this update to origin"
+STEP "user1 commits this update to origin"
 commit_push_gitmodules "$root_dir/user1/parent-repo"
 
-PAUSE "user2 clones RECURSIVELY (the normal way to onboard) and still gets child-repo-2"
+STEP "user2 clones RECURSIVELY (the normal way to onboard) and still gets child-repo-2"
 clone_repo $remote_dir/parent-repo $root_dir/user2 --recursive
 print_submodule_active_flags "$root_dir/user2/parent-repo" "gitmodules"
 print_submodule_active_flags "$root_dir/user2/parent-repo" "config"
-PAUSE "Print status for user 1 and 2 for the repos"
 
+STEP "Print status for user 1 and 2 for the repos"
 print_repo_statuses $NUM_USERS $REPOS_PER_LAYER
 
-PAUSE "🧪 Run tests"
+STEP "🧪 Run tests"
 
 INFO "🧪 TEST: child-repo-1 of user1 vs user2 → should be EQUAL. child-repo-1 was never marked inactive, so the recursive clone checked it out at the recorded commit."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/parent-repo/child-repo-1"
