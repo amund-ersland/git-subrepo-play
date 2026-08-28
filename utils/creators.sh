@@ -97,7 +97,7 @@ setup_layered_repos(){
     fi
 
     if [[ $extra != "skip-user2" ]]; then
-        clone_recursive $remote_dir/parent-repo $root_dir/user2
+        clone $remote_dir/parent-repo $root_dir/user2 --recursive
     fi
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"

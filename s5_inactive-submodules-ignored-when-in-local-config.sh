@@ -21,7 +21,7 @@ STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
 setup_layered_repos $prefix $LAYERS $REPOS_PER_LAYER "skip-user2"
 
 PAUSE "user2 clones the repo recursively so both children start active and checked out"
-clone_recursive $remote_dir/parent-repo $root_dir/user2
+clone $remote_dir/parent-repo $root_dir/user2 --recursive
 
 PAUSE "user1 advances both child repos with a new commit each"
 for c in 1 2; do

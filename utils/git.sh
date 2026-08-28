@@ -45,25 +45,42 @@ update_superproject_with_submodule(){
 }
 
 #===============================================================================
+# Clone a remote into a local directory.
+#   --recursive   clone submodules too (implies -c protocol.file.allow=always
+#                 so local file:// submodule remotes are allowed)
 clone(){
-    local remote_path=$1
-    local local_path=$2
+    local remote_path=""
+    local local_path=""
+    local recursive=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --recursive) recursive="--recursive"; shift ;;
+            *)
+                if [[ -z "$remote_path" ]]; then
+                    remote_path="$1"
+                else
+                    local_path="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    if [[ -z "$remote_path" || -z "$local_path" ]]; then
+        echo -e "\033[31mMissing required arguments: remote_path and/or local_path"
+        return 1
+    fi
+
     ensure_dir $local_path
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
-    run git clone $remote_path
-}
-
-#===============================================================================
-clone_recursive(){
-    local remote_path=$1
-    local local_path=$2
-    ensure_dir $local_path
-    remote_path=$(realpath $remote_path)
-    local_path=$(realpath $local_path)
-
-    run git -c protocol.file.allow=always clone --recursive $remote_path
+    if [[ -n "$recursive" ]]; then
+        run git -c protocol.file.allow=always clone --recursive $remote_path
+    else
+        run git clone $remote_path
+    fi
 }
 
 #===============================================================================
