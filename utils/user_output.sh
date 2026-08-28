@@ -55,7 +55,20 @@ STDOUT_TEXT(){
 }
 
 #===============================================================================
-# Set SKIP_PAUSE=true in a scenario script to run non-interactively.
+#===============================================================================
+# Call at the top of each scenario script: parse_args "$@"
+parse_args(){
+    SKIP_PAUSE=false
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -s|--skip-pause) SKIP_PAUSE=true; shift ;;
+            *) echo "Unknown option: $1" >&2; return 1 ;;
+        esac
+    done
+}
+
+#===============================================================================
+# Pass -s / --skip-pause to a scenario script to run non-interactively.
 PAUSE(){
     local msg=$1
     if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then

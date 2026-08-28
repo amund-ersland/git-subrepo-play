@@ -1,14 +1,11 @@
 #!/bin/bash
 set -eo pipefail
 
-# Set to true to run non-interactively (skip all pauses)
-SKIP_PAUSE=false
-
 _PWD=$PWD
 
-for u in utils/*; do
-    source $u
-done
+for u in utils/*; do source $u; done
+
+parse_args "$@"
 
 TITLE "This script demonstrates updating submodules recursively to get the same commits as pointet to by the superproject"
 
