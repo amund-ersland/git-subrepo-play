@@ -44,4 +44,12 @@ for u in 1 2; do
     done
 done
 
+PAUSE "🧪 Run tests"
+
+INFO "🧪 TEST: child-repo-1 of user1 vs user2 → should be EQUAL. child-repo-1 was never marked inactive, so user2's 'submodule update --init --recursive' checks it out at the recorded commit."
+sha_is_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/parent-repo/child-repo-1"
+
+INFO "🧪 TEST: child-repo-2 of user1 vs user2 → should be EQUAL even though it is marked active=false in .gitmodules. The 'active' flag in .gitmodules is IGNORED by 'submodule update --init', because --init re-activates every submodule before updating."
+sha_is_equal "$root_dir/user1/parent-repo/child-repo-2" "$root_dir/user2/parent-repo/child-repo-2"
+
 cd $_PWD

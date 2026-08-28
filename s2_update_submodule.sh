@@ -27,4 +27,12 @@ PAUSE "Print status for user1 and user2"
 repo_status $root_dir/user1/parent-repo child-repo user1
 repo_status $root_dir/user2/parent-repo child-repo user2
 
+PAUSE "🧪 Run tests"
+
+INFO "🧪 TEST: child-repo of user1 vs user2 → should be EQUAL, because user1 pushed a new child-repo commit + bumped the superproject pointer, and user2 ran 'submodule update --init --recursive' which checks out that exact recorded commit."
+sha_is_equal "$root_dir/user1/parent-repo/child-repo" "$root_dir/user2/parent-repo/child-repo"
+
+INFO "🧪 TEST: parent-repo of user1 vs user2 → should be EQUAL, because user2 pulled the superproject commit in which user1 recorded the updated child-repo pointer."
+sha_is_equal "$root_dir/user1/parent-repo" "$root_dir/user2/parent-repo"
+
 cd $_PWD
