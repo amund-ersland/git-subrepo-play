@@ -50,16 +50,22 @@ update_superproject_with_submodule(){
 
 #===============================================================================
 # Clone a remote into a local directory.
-#   --recursive   clone submodules too (implies -c protocol.file.allow=always
-#                 so local file:// submodule remotes are allowed)
+#   --recursive           clone submodules too (implies -c protocol.file.allow=always
+#                         so local file:// submodule remotes are allowed)
+#   --recurse <pathspec>  clone submodules matching <pathspec>, e.g.
+#                         ':(exclude)child-repo-2'. This writes the pathspec into
+#                         the new clone's submodule.active, so excluded submodules
+#                         stay inactive and are never checked out.
 clone_repo(){
     local remote_path=""
     local local_path=""
     local recursive=""
+    local recurse_pathspec=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --recursive) recursive="--recursive"; shift ;;
+            --recurse)   recurse_pathspec="$2";   shift 2 ;;
             *)
                 if [[ -z "$remote_path" ]]; then
                     remote_path="$1"
@@ -80,7 +86,9 @@ clone_repo(){
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
-    if [[ -n "$recursive" ]]; then
+    if [[ -n "$recurse_pathspec" ]]; then
+        run git -c protocol.file.allow=always clone --recurse-submodules="$recurse_pathspec" $remote_path
+    elif [[ -n "$recursive" ]]; then
         run git -c protocol.file.allow=always clone --recursive $remote_path
     else
         run git clone $remote_path
