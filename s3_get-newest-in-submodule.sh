@@ -25,7 +25,7 @@ PAUSE "user1 adds a file to child-repo"
 add_random_file_and_push "$root_dir/user1/parent-repo/child-repo"
 
 PAUSE "user2 pulls all the updates fetching the latest remotes"
-update_submodules $root_dir/user2/parent-repo --remote --init
+update_submodules $root_dir/user2/parent-repo --remote
 
 PAUSE "Print status for user 1 and 2 for the repos"
 print_repo_status $root_dir/user1/parent-repo child-repo user1
