@@ -48,6 +48,13 @@ SECTION(){
     _SECTION_COUNT=$(( ${_SECTION_COUNT:-0} + 1 ))
     LOG_SECTION "$_SECTION_COUNT $1"
     STDOUT_SECTION "$_SECTION_COUNT $1"
+
+    # Wait for the go-ahead before this section's commands run.
+    # Pass -s / --skip-pause to a scenario script to run non-interactively.
+    if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
+        read -p "↵  press enter to run this section..."
+        echo
+    fi
 }
 
 #===============================================================================
