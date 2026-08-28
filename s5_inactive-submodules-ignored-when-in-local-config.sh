@@ -10,6 +10,7 @@ parse_args "$@"
 TITLE "This script demonstrates the use of inactive flag in local gitconfig to skip updating a repo"
 
 LAYERS=2
+NUM_USERS=2
 REPOS_PER_LAYER=2
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
@@ -31,13 +32,7 @@ PAUSE "user2 updates submodules to newest remote WITHOUT --init so the inactive 
 update_remote_recursive_no_init $root_dir/user2/parent-repo
 PAUSE "Print status for user 1 and 2 for the repos"
 
-for u in 1 2; do
-    for c in 1 2; do
-        repo_status $root_dir/user$u/parent-repo \
-            child-repo-$c \
-            "user$u child-repo-$c"
-    done
-done
+print_repo_statuses $NUM_USERS $REPOS_PER_LAYER
 
 PAUSE "🧪 Run tests"
 
