@@ -41,4 +41,16 @@ assert_sha_equal "$root_dir/user1/parent-repo/child-repo" "$root_dir/user2/paren
 INFO "🧪 TEST: grandchild-repo of user1 vs user2 → should be EQUAL, because --remote applies recursively, so the nested grandchild-repo is also advanced to the newest commit on its remote branch that user1 pushed."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo/grandchild-repo" "$root_dir/user2/parent-repo/child-repo/grandchild-repo"
 
+INFO "🧪 TEST: user2's child-repo HEAD == its remote branch tip → --remote fetches and checks out the newest commit on the submodule's tracked remote branch."
+assert_submodule_at_remote_tip "$root_dir/user2/parent-repo" child-repo
+
+INFO "🧪 TEST: user2's grandchild-repo HEAD == its remote branch tip → --remote recursed into the nested submodule too."
+assert_submodule_at_remote_tip "$root_dir/user2/parent-repo/child-repo" grandchild-repo
+
+INFO "🧪 TEST: user2's child-repo HEAD is AHEAD of the pointer recorded in parent-repo → this is the key difference from a default update: user1 pushed new commits but never bumped the superproject pointer, so --remote moved the working tree past the recorded gitlink."
+assert_submodule_differs_gitlink "$root_dir/user2/parent-repo" child-repo
+
+INFO "🧪 TEST: user2's grandchild-repo HEAD is AHEAD of the pointer recorded in child-repo → same --remote behaviour at the nested level."
+assert_submodule_differs_gitlink "$root_dir/user2/parent-repo/child-repo" grandchild-repo
+
 cd $_PWD

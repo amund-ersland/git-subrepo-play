@@ -51,6 +51,18 @@ assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/par
 INFO "🧪 TEST: child-repo-2 of user1 vs user2 → should be EQUAL even though it is active=false in .gitmodules. 'git clone --recurse-submodules' is equivalent to 'submodule update --init --recursive' and sets submodule.active='.' in user2's local config, so the .gitmodules active flag is IGNORED and child-repo-2 is checked out anyway."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo-2" "$root_dir/user2/parent-repo/child-repo-2"
 
+INFO "🧪 TEST: the active=false flag really did arrive in user2's .gitmodules → this proves the clone had every reason to skip child-repo-2, yet did not."
+assert_active_flag "$root_dir/user2/parent-repo" child-repo-2 false gitmodules
+
+INFO "🧪 TEST: user2's LOCAL config has submodule.active='.' → this is the catch-all pathspec the recursive clone wrote, and it is what overrides the .gitmodules flag."
+assert_local_submodule_active_pathspec "$root_dir/user2/parent-repo" "."
+
+INFO "🧪 TEST: user2's child-repo-2 is actually INITIALIZED → despite active=false in .gitmodules, it was checked out."
+assert_submodule_initialized "$root_dir/user2/parent-repo" child-repo-2
+
+INFO "🧪 TEST: user2's child-repo-2 HEAD == the pointer recorded in parent-repo → the recursive clone checked out the recorded gitlink, confirming it was not skipped."
+assert_submodule_matches_gitlink "$root_dir/user2/parent-repo" child-repo-2
+
 INFO "ℹ️  NOTE: To actually keep a colleague from getting a submodule, use LOCAL config active=false without --init (see s4), or exclude it at clone time with a pathspec (see s5). The active flag in .gitmodules alone will not do it."
 
 # return to start folder

@@ -26,6 +26,7 @@ STEP "user1 updates parent repo with newest commit in child repo"
 update_superproject_with_submodule $root_dir/user1/parent-repo child-repo
 
 STEP "user2 pulls all the updates"
+user2_child_before=$(current_sha "$root_dir/user2/parent-repo/child-repo")
 update_submodules $root_dir/user2/parent-repo
 
 STEP "Print status for user1 and user2"
@@ -38,5 +39,15 @@ assert_sha_equal "$root_dir/user1/parent-repo/child-repo" "$root_dir/user2/paren
 
 INFO "🧪 TEST: parent-repo of user1 vs user2 → should be EQUAL, because user2 pulled the superproject commit in which user1 recorded the updated child-repo pointer."
 assert_sha_equal "$root_dir/user1/parent-repo" "$root_dir/user2/parent-repo"
+
+INFO "🧪 TEST: user2's child-repo advanced from its pre-update commit → 'submodule update' actually moved the working tree, it was not already there."
+assert_sha_advanced "$root_dir/user2/parent-repo/child-repo" "$user2_child_before"
+
+INFO "🧪 TEST: user2's child-repo HEAD == the pointer recorded in user2's parent-repo → a default (non --remote) update checks out exactly the RECORDED gitlink, which is the whole point of this workflow."
+assert_submodule_matches_gitlink "$root_dir/user2/parent-repo" child-repo
+
+INFO "🧪 TEST: user2's working trees are clean after the update."
+assert_clean_worktree "$root_dir/user2/parent-repo"
+assert_clean_worktree "$root_dir/user2/parent-repo/child-repo"
 
 cd $_PWD

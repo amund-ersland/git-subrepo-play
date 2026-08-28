@@ -32,6 +32,7 @@ for c in 1 2; do
 done
 
 STEP "user2 updates submodules to newest remote WITHOUT --init, expecting the .gitmodules flag to protect child-repo-2"
+user2_child2_before=$(current_sha "$root_dir/user2/parent-repo/child-repo-2")
 update_submodules $root_dir/user2/parent-repo --remote
 
 STEP "Show that user2 still has child-repo-2 active in LOCAL config (url set) — .gitmodules active=false never landed here"
@@ -49,6 +50,18 @@ assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/par
 
 INFO "🧪 TEST: child-repo-2 of user1 vs user2 → should be EQUAL even though .gitmodules says active=false. Because user2 already initialized child-repo-2 (its url is in local config), git's active check returns true at rule (3) 'url is set'. The active=false in .gitmodules is NOT copied into local config and is not consulted for an initialized submodule, so the non-init update updates it anyway."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo-2" "$root_dir/user2/parent-repo/child-repo-2"
+
+INFO "🧪 TEST: user2's .gitmodules really carries active=false for child-repo-2 → the flag arrived, yet was ignored."
+assert_active_flag "$root_dir/user2/parent-repo" child-repo-2 false gitmodules
+
+INFO "🧪 TEST: rule (3) mechanism → child-repo-2 has a url in user2's LOCAL config, which keeps it active."
+assert_local_url_set "$root_dir/user2/parent-repo" child-repo-2
+
+INFO "🧪 TEST: the .gitmodules active=false was NOT copied into user2's local config → so nothing overrode the url rule."
+assert_local_active_unset "$root_dir/user2/parent-repo" child-repo-2
+
+INFO "🧪 TEST: user2's child-repo-2 advanced from its pre-update commit → it was genuinely updated, not left behind."
+assert_sha_advanced "$root_dir/user2/parent-repo/child-repo-2" "$user2_child2_before"
 
 INFO "ℹ️  NOTE: So you CANNOT retroactively stop a teammate from getting a submodule by pushing active=false in .gitmodules once they've initialized it. To deactivate it you must set active=false in THEIR local config (see s4, where rule (1) submodule.<name>.active=false overrides the url), or have them exclude it at clone time with a pathspec (see s5)."
 
