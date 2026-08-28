@@ -92,7 +92,9 @@ STDOUT_PAUSE(){
     clear
     local msg=$1
     STDOUT_INFO "💡 $msg"
-    read
+    if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
+        read
+    fi
 }
 
 #===============================================================================
