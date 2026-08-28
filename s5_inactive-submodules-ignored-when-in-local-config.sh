@@ -27,8 +27,6 @@ PAUSE "user2 sets child-repo-2 to inactive in LOCAL git config (not .gitmodules)
 set_submodule_status $root_dir/user2/parent-repo child-repo-2 inactive config
 print_submodule_active_status "$root_dir/user2/parent-repo" "config"
 
-# NB: use the *no --init* variant here. With --init git would re-activate the
-# submodule and ignore our local submodule.<name>.active=false setting.
 PAUSE "user2 updates submodules to newest remote WITHOUT --init so the inactive flag is honored"
 update_remote_recursive_no_init $root_dir/user2/parent-repo
 PAUSE "Print status for user 1 and 2 for the repos"
