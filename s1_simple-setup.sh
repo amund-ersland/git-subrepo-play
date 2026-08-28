@@ -1,11 +1,18 @@
 #!/bin/bash
 set -eo pipefail
 
-for u in utils/*; do source $u; done
+# define constants
+LAYERS=2
 
+# save current pwd for return
+_PWD=$PWD
+
+# parse args and utils
+for u in utils/*; do source $u; done
 parse_args "$@"
 
-LAYERS=2
+# start script
+TITLE "This script demonstrate the setup of a nested repo and cloning for a second user"
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 setup_layered_repos $prefix $LAYERS
 

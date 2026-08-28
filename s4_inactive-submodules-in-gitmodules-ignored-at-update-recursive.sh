@@ -1,24 +1,29 @@
 #!/bin/bash
 set -eo pipefail
 
+# define constants
+LAYERS=2
+REPOS_PER_LAYER=2
+NUM_USERS=2
+
+# save current pwd for return
 _PWD=$PWD
 
+# parse args and utils
 for u in utils/*; do source $u; done
-
 parse_args "$@"
 
+# start script
 TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
 
-LAYERS=2
-NUM_USERS=2
-REPOS_PER_LAYER=2
-prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
+
+prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 setup_layered_repos $prefix $LAYERS $REPOS_PER_LAYER "skip-user2"
 
 PAUSE "user1 makes a commit in child-repo-1 and 2"
 superproject="$root_dir/user1/parent-repo"
-for c in 1 2; do 
+for c in 1 2; do
     commit_file "$superproject/child-repo-$c"
     update_superproject_with_submodule "$superproject" "child-repo-$c"
 done
@@ -47,4 +52,5 @@ sha_is_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/parent-
 INFO "🧪 TEST: child-repo-2 of user1 vs user2 → should be EQUAL even though it is marked active=false in .gitmodules. The 'active' flag in .gitmodules is IGNORED by 'submodule update --init', because --init re-activates every submodule before updating."
 sha_is_equal "$root_dir/user1/parent-repo/child-repo-2" "$root_dir/user2/parent-repo/child-repo-2"
 
+# return to start folder
 cd $_PWD

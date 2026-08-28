@@ -1,17 +1,21 @@
 #!/bin/bash
 set -eo pipefail
 
+# define constants
+LAYERS=2
+REPOS_PER_LAYER=2
+NUM_USERS=2
+
+# save current pwd for return
 _PWD=$PWD
 
+# parse args and utils
 for u in utils/*; do source $u; done
-
 parse_args "$@"
 
+# start script
 TITLE "This script demonstrates the use of inactive flag in local gitconfig to skip updating a repo"
 
-LAYERS=2
-NUM_USERS=2
-REPOS_PER_LAYER=2
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
 setup_layered_repos $prefix $LAYERS $REPOS_PER_LAYER "skip-user2"

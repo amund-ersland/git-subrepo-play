@@ -1,15 +1,19 @@
 #!/bin/bash
 set -eo pipefail
 
+# define constants
+LAYERS=3
+
+# save current pwd for return
 _PWD=$PWD
 
+# parse args and utils
 for u in utils/*; do source $u; done
-
 parse_args "$@"
 
+# start script
 TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
 
-LAYERS=3
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
 setup_layered_repos $prefix $LAYERS

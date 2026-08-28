@@ -1,16 +1,20 @@
 #!/bin/bash
 set -eo pipefail
 
-_PWD=$PWD
-
-for u in utils/*; do source $u; done
-
-parse_args "$@"
-
-TITLE "This script demonstrates updating submodules recursively to get the same commits as pointet to by the superproject"
-
+# define constants
 LAYERS=2
 NUM_USERS=2
+
+# save current pwd for return
+_PWD=$PWD
+
+# parse args and utils
+for u in utils/*; do source $u; done
+parse_args "$@"
+
+# start script
+TITLE "This script demonstrates updating submodules recursively to get the same commits as pointet to by the superproject"
+
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 STDOUT_PAUSE "Setup repos in $LAYERS layers"
 setup_layered_repos $prefix $LAYERS
