@@ -6,7 +6,10 @@ set -eo pipefail
 #
 # Any args (e.g. -s / --skip-pause) are forwarded to each scenario script.
 
-for scenario in s[0-9]*.sh; do
+# run from the demo root regardless of caller CWD
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+for scenario in scenarios/*/s[0-9]*.sh; do
     echo -e "\n\033[36m▶ Running $scenario\033[0m"
     if ! bash "$scenario" "--skip-pause"; then
         echo -e "\033[31m✗ $scenario failed — stopping\033[0m" >&2

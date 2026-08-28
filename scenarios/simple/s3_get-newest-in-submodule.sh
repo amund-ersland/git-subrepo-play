@@ -7,14 +7,18 @@ LAYERS=3
 # save current pwd for return
 _PWD=$PWD
 
+# scenarios live in scenarios/<category>/ — run from the demo root so config.conf
+# and the output_dir symlink resolve there, and source utils from scenarios/utils
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+
 # parse args and utils
-for u in utils/*; do source $u; done
+for u in scenarios/utils/*; do source $u; done
 parse_args "$@"
 
 # start script
 TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
 
-prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
+prefix="$(basename "$0" | cut -d _ -f 1)"
 STEP "Set up repos in $LAYERS layers"
 create_submodule_hierarchy $prefix $LAYERS
 

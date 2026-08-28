@@ -9,8 +9,12 @@ NUM_USERS=2
 # save current pwd for return
 _PWD=$PWD
 
+# scenarios live in scenarios/<category>/ — run from the demo root so config.conf
+# and the output_dir symlink resolve there, and source utils from scenarios/utils
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+
 # parse args and utils
-for u in utils/*; do source $u; done
+for u in scenarios/utils/*; do source $u; done
 parse_args "$@"
 
 # start script
@@ -18,7 +22,7 @@ TITLE "This script shows that pushing active=false in .gitmodules does NOT retro
 
 STEP "Set up repos in $LAYERS layers with $REPOS_PER_LAYER in each (user2 clones recursively up front, so both children start initialized with a url in local config)"
 
-prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
+prefix="$(basename "$0" | cut -d _ -f 1)"
 create_submodule_hierarchy $prefix $LAYERS $REPOS_PER_LAYER
 
 STEP "user1 sets child-repo-2 to inactive in .gitmodules and pushes it to the team"

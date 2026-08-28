@@ -9,8 +9,12 @@ NUM_USERS=2
 # save current pwd for return
 _PWD=$PWD
 
+# scenarios live in scenarios/<category>/ — run from the demo root so config.conf
+# and the output_dir symlink resolve there, and source utils from scenarios/utils
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+
 # parse args and utils
-for u in utils/*; do source $u; done
+for u in scenarios/utils/*; do source $u; done
 parse_args "$@"
 
 # start script
@@ -18,7 +22,7 @@ TITLE "This script busts a common misconception: setting active=false in .gitmod
 
 STEP "Set up repos in $LAYERS layers with $REPOS_PER_LAYER in each"
 
-prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
+prefix="$(basename "$0" | cut -d _ -f 1)"
 create_submodule_hierarchy $prefix $LAYERS $REPOS_PER_LAYER "skip-user2"
 
 STEP "user1 makes a commit in child-repo-1 and 2"

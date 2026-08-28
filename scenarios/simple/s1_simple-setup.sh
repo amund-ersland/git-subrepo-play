@@ -7,13 +7,17 @@ LAYERS=2
 # save current pwd for return
 _PWD=$PWD
 
+# scenarios live in scenarios/<category>/ — run from the demo root so config.conf
+# and the output_dir symlink resolve there, and source utils from scenarios/utils
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+
 # parse args and utils
-for u in utils/*; do source $u; done
+for u in scenarios/utils/*; do source $u; done
 parse_args "$@"
 
 # start script
 TITLE "This script demonstrates the setup of a nested repo and cloning for a second user"
-prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
+prefix="$(basename "$0" | cut -d _ -f 1)"
 
 STEP "Set up a nested repo hierarchy in $LAYERS layers and clone it for user2"
 create_submodule_hierarchy $prefix $LAYERS
