@@ -171,6 +171,30 @@ add_repo_as_submodule(){
 }
 
 #===============================================================================
+# Remove a submodule from a superproject the "correct" local way, then push:
+#   git submodule deinit -f <path>   # unregister it + wipe ITS working tree here
+#   git rm <path>                    # drop the gitlink AND the .gitmodules entry
+#   commit + push                    # publish the removal to the team
+#
+# ⚠️  This only cleans things up for the person running it. A colleague who later
+# pulls this commit and runs 'git submodule update' does NOT get their stale
+# submodule directory removed automatically — git refuses to delete a submodule
+# working tree on checkout to avoid destroying data. See s8 for that gotcha.
+remove_submodule(){
+    local superproject=$1
+    local submodule=$2
+    local msg=${3:-"remove $submodule submodule"}
+
+    LOG_INFO "## remove $submodule submodule from $(basename "$superproject")"
+
+    cd_into "$superproject"
+    run git submodule deinit -f "$submodule"
+    run git rm "$submodule"
+    run git commit -m "\"$msg\""
+    run git -c protocol.file.allow=always push
+}
+
+#===============================================================================
 checkout_repo(){
     local repo_path=$1
     local commit_ish=$2

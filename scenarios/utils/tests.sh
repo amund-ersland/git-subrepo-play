@@ -302,6 +302,54 @@ assert_in_gitmodules(){
 }
 
 #===============================================================================
+# Assert that a submodule is NO LONGER declared in .gitmodules (its definition
+# was removed, e.g. by 'git rm <submodule>'). The inverse of assert_in_gitmodules.
+# Usage: assert_not_in_gitmodules <superproject> <submodule>
+assert_not_in_gitmodules(){
+    local superproject=$1
+    local submodule=$2
+
+    if git -C "$superproject" config -f .gitmodules --get "submodule.$submodule.url" >/dev/null 2>&1; then
+        ERROR "❌ FAIL assert_not_in_gitmodules: $submodule is STILL declared in .gitmodules"
+        return 1
+    else
+        INFO "✅ PASS assert_not_in_gitmodules: $submodule is no longer declared in .gitmodules"
+    fi
+}
+
+#===============================================================================
+# Assert that a filesystem path EXISTS. Used to prove a removed submodule's
+# directory is left behind (stale) for a colleague who merely pulled + updated.
+# Usage: assert_path_exists <path> [label]
+assert_path_exists(){
+    local path=$1
+    local label=${2:-"$path"}
+
+    if [[ -e "$path" ]]; then
+        INFO "✅ PASS assert_path_exists: $label exists on disk"
+    else
+        ERROR "❌ FAIL assert_path_exists: $label does not exist"
+        return 1
+    fi
+}
+
+#===============================================================================
+# Assert that a filesystem path does NOT exist. Used to prove a submodule's
+# directory was genuinely removed (e.g. for the user who ran the removal).
+# Usage: assert_path_absent <path> [label]
+assert_path_absent(){
+    local path=$1
+    local label=${2:-"$path"}
+
+    if [[ ! -e "$path" ]]; then
+        INFO "✅ PASS assert_path_absent: $label is gone from disk"
+    else
+        ERROR "❌ FAIL assert_path_absent: $label still exists"
+        return 1
+    fi
+}
+
+#===============================================================================
 # Assert that a repo's HEAD moved forward from a previously captured sha.
 # Usage:
 #   before=$(current_sha "$repo")
