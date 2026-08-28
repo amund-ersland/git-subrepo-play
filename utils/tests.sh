@@ -13,7 +13,7 @@ _head_sha(){
     fi
 }
 
-_short(){
+_short_sha(){
     local sha=$1
     if [[ "$sha" == "<no-checkout>" ]]; then
         echo "$sha"
@@ -24,45 +24,45 @@ _short(){
 
 #===============================================================================
 # Assert that two repos are at the same commit SHA.
-# Usage: sha_is_equal <path-to-repo-1> <path-to-repo-2>
+# Usage: assert_sha_equal <path-to-repo-1> <path-to-repo-2>
 # Returns 1 and prints an error if the SHAs differ.
-sha_is_equal(){
+assert_sha_equal(){
     local repo1=$1
     local repo2=$2
 
     local sha1 sha2 short1 short2
     sha1=$(_head_sha "$repo1")
     sha2=$(_head_sha "$repo2")
-    short1=$(_short "$sha1")
-    short2=$(_short "$sha2")
+    short1=$(_short_sha "$sha1")
+    short2=$(_short_sha "$sha2")
 
     if [[ "$sha1" == "$sha2" && "$sha1" != "<no-checkout>" ]]; then
-        INFO "✅ PASS sha_is_equal: $(basename $repo1) and $(basename $repo2) are at the same commit ($short1)"
+        INFO "✅ PASS assert_sha_equal: $(basename $repo1) and $(basename $repo2) are at the same commit ($short1)"
     else
-        ERROR "❌ FAIL sha_is_equal: expected equal but $(basename $repo1) ($short1) ≠ $(basename $repo2) ($short2)"
+        ERROR "❌ FAIL assert_sha_equal: expected equal but $(basename $repo1) ($short1) ≠ $(basename $repo2) ($short2)"
         return 1
     fi
 }
 
 #===============================================================================
 # Assert that two repos are NOT at the same commit SHA.
-# Usage: sha_is_not_equal <path-to-repo-1> <path-to-repo-2>
+# Usage: assert_sha_not_equal <path-to-repo-1> <path-to-repo-2>
 # A repo with no checkout (inactive submodule) also counts as "not equal".
 # Returns 1 and prints an error if the SHAs are equal.
-sha_is_not_equal(){
+assert_sha_not_equal(){
     local repo1=$1
     local repo2=$2
 
     local sha1 sha2 short1 short2
     sha1=$(_head_sha "$repo1")
     sha2=$(_head_sha "$repo2")
-    short1=$(_short "$sha1")
-    short2=$(_short "$sha2")
+    short1=$(_short_sha "$sha1")
+    short2=$(_short_sha "$sha2")
 
     if [[ "$sha1" != "$sha2" ]]; then
-        INFO "✅ PASS sha_is_not_equal: $(basename $repo1) ($short1) ≠ $(basename $repo2) ($short2) as expected"
+        INFO "✅ PASS assert_sha_not_equal: $(basename $repo1) ($short1) ≠ $(basename $repo2) ($short2) as expected"
     else
-        ERROR "❌ FAIL sha_is_not_equal: expected different but $(basename $repo1) and $(basename $repo2) are both at ($short1)"
+        ERROR "❌ FAIL assert_sha_not_equal: expected different but $(basename $repo1) and $(basename $repo2) are both at ($short1)"
         return 1
     fi
 }

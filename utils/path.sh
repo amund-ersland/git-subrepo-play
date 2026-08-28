@@ -18,7 +18,7 @@ relpath(){
 }
 
 #===============================================================================
-ensure_dir(){
+cd_into(){
     dir=$1
     if [[ $(realpath $dir) != "$PWD" ]]; then
         run cd $(relpath $dir)

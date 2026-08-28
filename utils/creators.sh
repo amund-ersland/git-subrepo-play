@@ -1,10 +1,10 @@
-setup_layered_repos(){
+create_submodule_hierarchy(){
     local name_base=${1:-""}
     local layers=$2
     local repos_per_layer=${3:-1}
     local extra=$4
 
-    create_output_root_dir $name_base
+    setup_output_dirs $name_base
 
     create_bare_repo "parent-repo"
     if [[ $repos_per_layer -eq 1 ]]; then
@@ -16,18 +16,18 @@ setup_layered_repos(){
     fi
 
     # Setup user1 parent
-    clone $remote_dir/parent-repo $root_dir/user1
-    commit_file $root_dir/user1/parent-repo
+    clone_repo $remote_dir/parent-repo $root_dir/user1
+    add_random_file_and_push $root_dir/user1/parent-repo
 
     # Setup each child with initial commit (footnote 1)
     if [[ $repos_per_layer -eq 1 ]]; then
-        clone $remote_dir/child-repo $root_dir/user1
-        commit_file $root_dir/user1/child-repo
+        clone_repo $remote_dir/child-repo $root_dir/user1
+        add_random_file_and_push $root_dir/user1/child-repo
         run rm -rf $root_dir/user1/child-repo
     else
         for i in $(seq 1 $repos_per_layer); do
-            clone $remote_dir/child-repo-$i $root_dir/user1
-            commit_file $root_dir/user1/child-repo-$i
+            clone_repo $remote_dir/child-repo-$i $root_dir/user1
+            add_random_file_and_push $root_dir/user1/child-repo-$i
             run rm -rf $root_dir/user1/child-repo-$i
         done
     fi
@@ -36,15 +36,15 @@ setup_layered_repos(){
         # Setup each grandchild with initial commit
         if [[ $repos_per_layer -eq 1 ]]; then
             create_bare_repo "grandchild-repo"
-            clone $remote_dir/grandchild-repo $root_dir/user1
-            commit_file $root_dir/user1/grandchild-repo
+            clone_repo $remote_dir/grandchild-repo $root_dir/user1
+            add_random_file_and_push $root_dir/user1/grandchild-repo
             run rm -rf $root_dir/user1/grandchild-repo
         else
             for i in $(seq 1 $repos_per_layer); do
                 for j in $(seq 1 $repos_per_layer); do
                     create_bare_repo "grandchild-repo-$i-$j"
-                    clone $remote_dir/grandchild-repo-$i-$j $root_dir/user1
-                    commit_file $root_dir/user1/grandchild-repo-$i-$j
+                    clone_repo $remote_dir/grandchild-repo-$i-$j $root_dir/user1
+                    add_random_file_and_push $root_dir/user1/grandchild-repo-$i-$j
                     run rm -rf $root_dir/user1/grandchild-repo-$i-$j
                 done
             done
@@ -97,7 +97,7 @@ setup_layered_repos(){
     fi
 
     if [[ $extra != "skip-user2" ]]; then
-        clone $remote_dir/parent-repo $root_dir/user2 --recursive
+        clone_repo $remote_dir/parent-repo $root_dir/user2 --recursive
     fi
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"
@@ -120,7 +120,7 @@ setup_layered_repos(){
 }
 
 #===============================================================================
-create_output_root_dir() {
+setup_output_dirs() {
     source config.conf
 
     local name_base="$1"
@@ -151,7 +151,7 @@ create_output_root_dir() {
 #===============================================================================
 create_bare_repo() {
     local name="$1"
-    ensure_dir $remote_dir
+    cd_into $remote_dir
     run git init --bare $name
 }
 

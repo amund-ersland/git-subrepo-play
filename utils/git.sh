@@ -1,8 +1,8 @@
-commit_file(){
+add_random_file_and_push(){
     local repo_path=$1
     local msg=${2:-""}
 
-    ensure_dir $repo_path
+    cd_into $repo_path
     local dir=files
 
     if [[ ! -d $dir ]]; then
@@ -25,13 +25,13 @@ _add_commit_push(){
     local path_to_add=$2
     local msg=$3
 
-    ensure_dir "$repo_path"
+    cd_into "$repo_path"
     run git add "$path_to_add"
     run git commit -m "\"$msg\""
     run git -c protocol.file.allow=always push
 }
 
-commit_gitmodules(){
+commit_push_gitmodules(){
     local repo_path=$1
     local msg=${2:-"update .gitmodules"}
 
@@ -52,7 +52,7 @@ update_superproject_with_submodule(){
 # Clone a remote into a local directory.
 #   --recursive   clone submodules too (implies -c protocol.file.allow=always
 #                 so local file:// submodule remotes are allowed)
-clone(){
+clone_repo(){
     local remote_path=""
     local local_path=""
     local recursive=""
@@ -76,7 +76,7 @@ clone(){
         return 1
     fi
 
-    ensure_dir $local_path
+    cd_into $local_path
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
@@ -88,10 +88,10 @@ clone(){
 }
 
 #===============================================================================
-update_recursive_base(){
+pull_superproject(){
     local repo=$(relpath $1)
     LOG_INFO "## pull changes in superproject and update submodules in $repo"
-    ensure_dir $repo
+    cd_into $repo
     run git pull
 }
 
@@ -119,7 +119,7 @@ update_submodules(){
         return 1
     fi
 
-    update_recursive_base "$repo"
+    pull_superproject "$repo"
     run git -c protocol.file.allow=always submodule update $remote $init --recursive
 }
 
@@ -163,12 +163,12 @@ add_repo_as_submodule(){
 }
 
 #===============================================================================
-checkout(){
+checkout_repo(){
     local repo_path=$1
     local commit_ish=$2
     local arg=$3
 
-    ensure_dir $repo_path
+    cd_into $repo_path
     git checkout $arg $commit_ish
 }
 
@@ -178,12 +178,12 @@ set_current_branch_upstream(){
 }
 
 #===============================================================================
-repo_status() {
+print_repo_status() {
     local superproject=$1
     local submodule=$2
     local strong_title=${3:-"$(realpath $superproject)"}
 
-    ensure_dir $superproject
+    cd_into $superproject
 
     declare -A what_to_command=(
         [submodule current sha]="git -C $submodule rev-parse --short HEAD"
@@ -206,13 +206,13 @@ repo_status() {
 }
 
 #===============================================================================
-set_submodule_status(){
+set_submodule_active(){
     local superproject=$1
     local submodule=$2
     local status=$3
     local where=${4:-"gitmodules"}
 
-    ensure_dir $superproject
+    cd_into $superproject
     local flag=false
 
     if [[ $status == "active" ]]; then
@@ -227,13 +227,13 @@ set_submodule_status(){
 }
 
 #===============================================================================
-print_submodule_active_status(){
+print_submodule_active_flags(){
     local superproject=$1
     local where=${2:-"gitmodules"}
     
     local strong_title="$(realpath $superproject)"
 
-    ensure_dir $superproject
+    cd_into $superproject
 
     if [[ $where == "gitmodules" ]]; then
         status_cmd="git config -f .gitmodules --get-regexp '^submodule\..*\.active$'"
