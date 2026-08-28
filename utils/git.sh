@@ -19,29 +19,33 @@ commit_file(){
     run git push
 }
 
+# private helper: stage a path, commit, push
+_add_commit_push(){
+    local repo_path=$1
+    local path_to_add=$2
+    local msg=$3
+
+    ensure_dir "$repo_path"
+    run git add "$path_to_add"
+    run git commit -m "\"$msg\""
+    run git -c protocol.file.allow=always push
+}
+
 commit_gitmodules(){
     local repo_path=$1
     local msg=${2:-"update .gitmodules"}
 
-    ensure_dir $repo_path
-    run git add .gitmodules
-    run git commit -m "\"$msg\""
-    
-    run git push
+    _add_commit_push "$repo_path" ".gitmodules" "$msg"
 }
 
 #===============================================================================
 update_superproject_with_submodule(){
-    superproject=$1
-    submodule=$2
+    local superproject=$1
+    local submodule=$2
+    local msg=${3:-"update $(basename "$superproject") with current $submodule"}
 
-    local msg="update $(basename $superproject) with current $submodule"
     LOG_INFO "## $msg"
-
-    ensure_dir $superproject
-    run git add $submodule
-    run git commit -m "\"$msg\""
-    run git -c protocol.file.allow=always push
+    _add_commit_push "$superproject" "$submodule" "$msg"
 }
 
 #===============================================================================
