@@ -55,19 +55,23 @@ STDOUT_TEXT(){
 }
 
 #===============================================================================
+# Set SKIP_PAUSE=true in a scenario script to run non-interactively.
 PAUSE(){
-    read -p "press enter to continue"
-    clear
     local msg=$1
-    INFO "💡 $msg\n"
-    read
+    if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
+        read -p "↵  press enter to continue..."
+        clear
+    fi
+    INFO "💡 $msg"
 }
 
 #===============================================================================
 TITLE(){
     clear
-    STDOUT_INFO "🥬$1"
-    read -p "press enter to start"
+    STDOUT_INFO "🥬 $1"
+    if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
+        read -p "↵  press enter to start..."
+    fi
 }
 
 #===============================================================================

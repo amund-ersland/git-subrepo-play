@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eo pipefail
 
+# Set to true to run non-interactively (skip all pauses)
+SKIP_PAUSE=false
+
 _PWD=$PWD
 
 for u in utils/*; do
