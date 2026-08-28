@@ -62,6 +62,7 @@ clone_repo(){
     local recursive=""
     local recurse_pathspec=""
 
+    SECTION "parse arguments"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --recursive) recursive="--recursive"; shift ;;
@@ -82,10 +83,12 @@ clone_repo(){
         return 1
     fi
 
+    SECTION "resolve paths and move into the target directory"
     cd_into $local_path
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
+    SECTION "clone the remote"
     if [[ -n "$recurse_pathspec" ]]; then
         run git -c protocol.file.allow=always clone --recurse-submodules="$recurse_pathspec" $remote_path
     elif [[ -n "$recursive" ]]; then
@@ -114,6 +117,7 @@ update_submodules(){
     local remote=""
     local repo=""
 
+    SECTION "parse arguments"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --init)   init="--init";     shift ;;
@@ -127,6 +131,7 @@ update_submodules(){
         return 1
     fi
 
+    SECTION "pull the superproject, then update its submodules"
     pull_superproject "$repo"
     run git -c protocol.file.allow=always submodule update $remote $init --recursive
 }
@@ -136,6 +141,7 @@ add_repo_as_submodule(){
     local superproject=""
     local child_remote=""
 
+    SECTION "parse arguments"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --superproject)
@@ -162,11 +168,13 @@ add_repo_as_submodule(){
 
     LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
 
+    SECTION "add the submodule and commit the new .gitmodules + gitlink"
     superproject=$(relpath $superproject)
     run cd $superproject
     run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
     run git commit -m "\"Add submodule "$path_to_submodule"\""
 
+    SECTION "push the superproject"
     run git -c "protocol.file.allow=always" push
 }
 
@@ -201,7 +209,7 @@ print_repo_status() {
 
     INFO $LINE
 
-    INFO "\033[36m$strong_title\033[35m - status of $(basename $superproject) and its submodules"
+    INFO "\033[1;36m$strong_title\033[0;36m - status of $(basename $superproject) and its submodules"
     TEXT "\nDescription           | sha     | command to run "
     TEXT "----------------------|---------|----------------"
     for what in "${!what_to_command[@]}"; do

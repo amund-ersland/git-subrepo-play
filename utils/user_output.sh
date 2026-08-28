@@ -28,13 +28,33 @@ INFO(){
 
 #===============================================================================
 LOG_INFO(){
-    printf "\n\033[35m$1\033[0m" >> $CMD_LOG
-    printf "\n\033[35m$1\033[0m" >> $FULL_LOG
+    printf "\n\033[36m$1\033[0m" >> $CMD_LOG
+    printf "\n\033[36m$1\033[0m" >> $FULL_LOG
 }
 
 #===============================================================================
 STDOUT_INFO(){
-    echo -e "\033[35m$1\033[0m"
+    echo -e "\033[36m$1\033[0m"
+}
+
+#===============================================================================
+# SECTION prints a purple (35) header to visually group a block of commands
+# inside a larger function, so both the terminal output and the logs are easier
+# to scan. Use it to break big functions into labelled steps.
+SECTION(){
+    LOG_SECTION "$1"
+    STDOUT_SECTION "$1"
+}
+
+#===============================================================================
+LOG_SECTION(){
+    printf "\n\033[35m▸ $1\033[0m" >> $CMD_LOG
+    printf "\n\033[35m▸ $1\033[0m" >> $FULL_LOG
+}
+
+#===============================================================================
+STDOUT_SECTION(){
+    echo -e "\033[35m▸ $1\033[0m"
 }
 
 #===============================================================================

@@ -29,11 +29,13 @@ create_submodule_hierarchy(){
 
     local children=($(repo_names "child-repo" "$repos_per_layer"))
 
+    SECTION "create the parent repo and seed it with a first commit"
     # user1 gets the parent and seeds it with a first commit
     create_bare_repo "parent-repo"
     clone_repo $remote_dir/parent-repo $root_dir/user1
     add_random_file_and_push $root_dir/user1/parent-repo
 
+    SECTION "add each child as a submodule of the parent"
     # Each child needs an initial commit, then is added as a submodule of parent
     for c in "${children[@]}"; do
         seed_remote_repo "$c"
@@ -44,6 +46,7 @@ create_submodule_hierarchy(){
 
     # Third layer: one grandchild submodule under each child (used by s3).
     if [[ $layers -ge 3 ]]; then
+        SECTION "add a grandchild submodule under each child"
         for c in "${children[@]}"; do
             local gc="grandchild-repo"
             [[ ${#children[@]} -gt 1 ]] && gc="grandchild-repo-${c##*-}"
@@ -61,11 +64,13 @@ create_submodule_hierarchy(){
     fi
 
     if [[ $extra != "skip-user2" ]]; then
+        SECTION "clone the whole hierarchy as user2"
         clone_repo $remote_dir/parent-repo $root_dir/user2 --recursive
     fi
 
     echo -e  "\033[32m ✅ Setup complete\033[0m"
 
+    SECTION "print the resulting directory structures"
     STDOUT_INFO $LINE
     STDOUT_INFO "📁 Remote repositories structure:"
     tree -L 1 "$remote_dir"
