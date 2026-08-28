@@ -7,7 +7,7 @@ for u in utils/*; do source $u; done
 
 parse_args "$@"
 
-TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
+TITLE "This script demonstrates the use of inactive flag in local gitconfig to skip updating a repo"
 
 LAYERS=2
 REPOS_PER_LAYER=2
