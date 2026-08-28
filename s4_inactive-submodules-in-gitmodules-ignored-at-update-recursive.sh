@@ -14,7 +14,7 @@ for u in utils/*; do source $u; done
 parse_args "$@"
 
 # start script
-TITLE "This script demonstrates updating submodules recursively with the remote flag to get the newest commit of the submodule"
+TITLE "This script demonstrates that an inactive (active=false) flag in .gitmodules is ignored by 'submodule update --init', which re-activates and updates every submodule"
 
 STDOUT_PAUSE "Setup repos in $LAYERS with $REPOS_PER_LAYER in each"
 

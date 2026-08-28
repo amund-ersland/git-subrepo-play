@@ -12,7 +12,7 @@ for u in utils/*; do source $u; done
 parse_args "$@"
 
 # start script
-TITLE "This script demonstrate the setup of a nested repo and cloning for a second user"
+TITLE "This script demonstrates the setup of a nested repo and cloning for a second user"
 prefix="$(echo $0 | cut -d _ -f 1 | cut -d / -f 2)"
 create_submodule_hierarchy $prefix $LAYERS
 
