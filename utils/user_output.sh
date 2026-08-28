@@ -73,7 +73,7 @@ parse_args(){
 # Pass -s / --skip-pause to a scenario script to run non-interactively.
 TITLE(){
     _STEP_STARTED=false
-    clear
+    [[ "${SKIP_PAUSE:-false}" != "true" ]] && clear
     STDOUT_INFO "🥬 $1"
     if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
         read -p "↵  press enter to start..."
@@ -94,14 +94,15 @@ TITLE(){
 STEP(){
     local msg=$1
 
-    # 1. Let the user review the previous step before we wipe the screen.
-    if [[ "${SKIP_PAUSE:-false}" != "true" && "${_STEP_STARTED:-false}" == "true" ]]; then
-        read -p "↵  press enter for the next step..."
+    # 1. In interactive mode: let the user review the previous step, then wipe
+    #    the screen. Skipped entirely with --skip-pause so output stays scrolled.
+    if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
+        [[ "${_STEP_STARTED:-false}" == "true" ]] && read -p "↵  press enter for the next step..."
+        clear
     fi
     _STEP_STARTED=true
 
-    # 2. + 3. Fresh screen, then announce what is about to happen.
-    clear
+    # 2. Announce what is about to happen.
     # Logs may not exist yet on the very first (setup) step, so fall back to
     # stdout-only until CMD_LOG/FULL_LOG have been created.
     if [[ -n "${CMD_LOG:-}" ]]; then
@@ -110,7 +111,7 @@ STEP(){
         STDOUT_INFO "💡 $msg"
     fi
 
-    # 4. Wait for the go-ahead, then the caller's commands run.
+    # 3. Wait for the go-ahead, then the caller's commands run.
     if [[ "${SKIP_PAUSE:-false}" != "true" ]]; then
         read -p "↵  press enter to run this step..."
         echo
