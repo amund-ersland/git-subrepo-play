@@ -62,7 +62,6 @@ clone_repo(){
     local recursive=""
     local recurse_pathspec=""
 
-    SECTION "parse arguments"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --recursive) recursive="--recursive"; shift ;;
@@ -83,12 +82,10 @@ clone_repo(){
         return 1
     fi
 
-    SECTION "resolve paths and move into the target directory"
     cd_into $local_path
     remote_path=$(realpath $remote_path)
     local_path=$(realpath $local_path)
 
-    SECTION "clone the remote"
     if [[ -n "$recurse_pathspec" ]]; then
         run git -c protocol.file.allow=always clone --recurse-submodules="$recurse_pathspec" $remote_path
     elif [[ -n "$recursive" ]]; then
@@ -117,7 +114,6 @@ update_submodules(){
     local remote=""
     local repo=""
 
-    SECTION "parse arguments"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --init)   init="--init";     shift ;;
@@ -131,7 +127,6 @@ update_submodules(){
         return 1
     fi
 
-    SECTION "pull the superproject, then update its submodules"
     pull_superproject "$repo"
     run git -c protocol.file.allow=always submodule update $remote $init --recursive
 }
@@ -141,7 +136,6 @@ add_repo_as_submodule(){
     local superproject=""
     local child_remote=""
 
-    SECTION "parse arguments"
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --superproject)
@@ -168,13 +162,11 @@ add_repo_as_submodule(){
 
     LOG_INFO "## add $(basename $child_remote) as submodule to $(basename $superproject)"
 
-    SECTION "add the submodule and commit the new .gitmodules + gitlink"
     superproject=$(relpath $superproject)
     run cd $superproject
     run git -c protocol.file.allow=always submodule add "$child_remote" "$path_to_submodule"
     run git commit -m "\"Add submodule "$path_to_submodule"\""
 
-    SECTION "push the superproject"
     run git -c "protocol.file.allow=always" push
 }
 
@@ -234,7 +226,7 @@ set_submodule_active(){
     if [[ $status == "active" ]]; then
         flag=true
     fi
- 
+
     if [[ $where == "gitmodules" ]]; then
         run git config -f .gitmodules submodule.$submodule.active $flag
     else
@@ -246,7 +238,7 @@ set_submodule_active(){
 print_submodule_active_flags(){
     local superproject=$1
     local where=${2:-"gitmodules"}
-    
+
     local strong_title="$(realpath $superproject)"
 
     cd_into $superproject
@@ -256,7 +248,7 @@ print_submodule_active_flags(){
     else
         status_cmd="git config --get-regexp '^submodule\..*\.active$'"
     fi
-    
+
     INFO "active submodules \033[0m ($status_cmd)"
     TEXT "$(eval $status_cmd)"
 }

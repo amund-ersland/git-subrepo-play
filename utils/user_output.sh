@@ -41,9 +41,13 @@ STDOUT_INFO(){
 # SECTION prints a purple (35) header to visually group a block of commands
 # inside a larger function, so both the terminal output and the logs are easier
 # to scan. Use it to break big functions into labelled steps.
+#
+# Each SECTION is enumerated with an incrementing number starting from 1. The
+# counter is reset by STEP, so the sections within every step count from 1.
 SECTION(){
-    LOG_SECTION "$1"
-    STDOUT_SECTION "$1"
+    _SECTION_COUNT=$(( ${_SECTION_COUNT:-0} + 1 ))
+    LOG_SECTION "$_SECTION_COUNT $1"
+    STDOUT_SECTION "$_SECTION_COUNT $1"
 }
 
 #===============================================================================
@@ -113,6 +117,9 @@ TITLE(){
 # Pass -s / --skip-pause to a scenario script to run non-interactively.
 STEP(){
     local msg=$1
+
+    # Restart the SECTION counter so this step's sections number from 1.
+    _SECTION_COUNT=0
 
     # 1. In interactive mode: let the user review the previous step, then wipe
     #    the screen. Skipped entirely with --skip-pause so output stays scrolled.
