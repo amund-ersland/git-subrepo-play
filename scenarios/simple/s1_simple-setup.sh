@@ -39,3 +39,6 @@ assert_submodule_matches_gitlink "$root_dir/user2/parent-repo" child-repo
 INFO "🧪 TEST: both working trees are clean → the clone/checkout left no stray or modified files."
 assert_clean_worktree "$root_dir/user2/parent-repo"
 assert_clean_worktree "$root_dir/user2/parent-repo/child-repo"
+
+# restore the caller's working directory before exiting
+cd $_PWD
