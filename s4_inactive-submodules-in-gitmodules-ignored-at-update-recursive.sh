@@ -39,7 +39,7 @@ PAUSE "user2 clones repo and still gets child-2"
 clone $remote_dir/parent-repo $root_dir/user2
 print_submodule_active_status "$root_dir/user2/parent-repo"
 print_submodule_active_status "$root_dir/user2/parent-repo" "config"
-update_init_recursive $root_dir/user2/parent-repo
+update_submodules --init $root_dir/user2/parent-repo
 PAUSE "Print status for user 1 and 2 for the repos"
 
 print_repo_statuses $NUM_USERS $REPOS_PER_LAYER

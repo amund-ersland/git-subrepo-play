@@ -75,29 +75,31 @@ update_recursive_base(){
 }
 
 #===============================================================================
-update_recursive(){
-    update_recursive_base $1
-    run git -c protocol.file.allow=always submodule update --recursive
-}
+# Pull the superproject and update its submodules.
+#   --init     pass --init   (activate/initialize submodules; re-activates even
+#              submodules marked submodule.<name>.active=false)
+#   --remote   pass --remote (fetch newest from the submodule's remote branch)
+# --recursive is always applied.
+update_submodules(){
+    local init=""
+    local remote=""
+    local repo=""
 
-#===============================================================================
-update_init_recursive(){
-    update_recursive_base $1
-    run git -c protocol.file.allow=always submodule update --init --recursive
-}
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --init)   init="--init";     shift ;;
+            --remote) remote="--remote"; shift ;;
+            *)        repo="$1";         shift ;;
+        esac
+    done
 
-#===============================================================================
-update_remote_recursive(){
-    update_recursive_base $1
-    run git -c protocol.file.allow=always submodule update --remote --init --recursive
-}
+    if [[ -z "$repo" ]]; then
+        echo -e "\033[31mMissing required argument: repo path"
+        return 1
+    fi
 
-#===============================================================================
-# Like update_remote_recursive but without --init, so submodule.<name>.active=false
-# is honored instead of being re-activated by --init.
-update_remote_recursive_no_init(){
-    update_recursive_base $1
-    run git -c protocol.file.allow=always submodule update --remote --recursive
+    update_recursive_base "$repo"
+    run git -c protocol.file.allow=always submodule update $remote $init --recursive
 }
 
 #===============================================================================
