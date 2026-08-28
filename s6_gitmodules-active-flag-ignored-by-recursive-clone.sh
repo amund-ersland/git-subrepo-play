@@ -51,7 +51,7 @@ assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/par
 INFO "🧪 TEST: child-repo-2 of user1 vs user2 → should be EQUAL even though it is active=false in .gitmodules. 'git clone --recurse-submodules' is equivalent to 'submodule update --init --recursive' and sets submodule.active='.' in user2's local config, so the .gitmodules active flag is IGNORED and child-repo-2 is checked out anyway."
 assert_sha_equal "$root_dir/user1/parent-repo/child-repo-2" "$root_dir/user2/parent-repo/child-repo-2"
 
-INFO "ℹ️  NOTE: To actually keep a colleague from getting a submodule, use LOCAL config active=false without --init (see s5), or exclude it at clone time with a pathspec (see s6). The active flag in .gitmodules alone will not do it."
+INFO "ℹ️  NOTE: To actually keep a colleague from getting a submodule, use LOCAL config active=false without --init (see s4), or exclude it at clone time with a pathspec (see s5). The active flag in .gitmodules alone will not do it."
 
 # return to start folder
 cd $_PWD

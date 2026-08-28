@@ -229,7 +229,7 @@ set_submodule_active(){
  
     if [[ $where == "gitmodules" ]]; then
         run git config -f .gitmodules submodule.$submodule.active $flag
-    else [[ $where == "config" ]] 
+    else
         run git config submodule.$submodule.active $flag
     fi
 }

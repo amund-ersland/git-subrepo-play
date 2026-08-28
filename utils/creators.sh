@@ -1,3 +1,24 @@
+# Print the submodule names for a layer: "child-repo" for a single repo, or
+# "child-repo-1 child-repo-2 ..." when there is more than one per layer.
+repo_names(){
+    local base=$1 count=$2
+    if [[ $count -eq 1 ]]; then
+        echo "$base"
+    else
+        for i in $(seq 1 $count); do echo "$base-$i"; done
+    fi
+}
+
+# Give a repo its first commit so it can be added as a submodule (footnote 1),
+# then remove the throwaway clone.
+seed_remote_repo(){
+    local name=$1
+    create_bare_repo "$name"
+    clone_repo $remote_dir/$name $root_dir/user1
+    add_random_file_and_push $root_dir/user1/$name
+    run rm -rf $root_dir/user1/$name
+}
+
 create_submodule_hierarchy(){
     local name_base=${1:-""}
     local layers=$2
@@ -6,94 +27,37 @@ create_submodule_hierarchy(){
 
     setup_output_dirs $name_base
 
-    create_bare_repo "parent-repo"
-    if [[ $repos_per_layer -eq 1 ]]; then
-        create_bare_repo "child-repo"
-    else
-        for i in $(seq 1 $repos_per_layer); do
-            create_bare_repo "child-repo-$i"
-        done
-    fi
+    local children=($(repo_names "child-repo" "$repos_per_layer"))
 
-    # Setup user1 parent
+    # user1 gets the parent and seeds it with a first commit
+    create_bare_repo "parent-repo"
     clone_repo $remote_dir/parent-repo $root_dir/user1
     add_random_file_and_push $root_dir/user1/parent-repo
 
-    # Setup each child with initial commit (footnote 1)
-    if [[ $repos_per_layer -eq 1 ]]; then
-        clone_repo $remote_dir/child-repo $root_dir/user1
-        add_random_file_and_push $root_dir/user1/child-repo
-        run rm -rf $root_dir/user1/child-repo
-    else
-        for i in $(seq 1 $repos_per_layer); do
-            clone_repo $remote_dir/child-repo-$i $root_dir/user1
-            add_random_file_and_push $root_dir/user1/child-repo-$i
-            run rm -rf $root_dir/user1/child-repo-$i
-        done
-    fi
-
-    if [[ $layers -ge 3 ]]; then
-        # Setup each grandchild with initial commit
-        if [[ $repos_per_layer -eq 1 ]]; then
-            create_bare_repo "grandchild-repo"
-            clone_repo $remote_dir/grandchild-repo $root_dir/user1
-            add_random_file_and_push $root_dir/user1/grandchild-repo
-            run rm -rf $root_dir/user1/grandchild-repo
-        else
-            for i in $(seq 1 $repos_per_layer); do
-                for j in $(seq 1 $repos_per_layer); do
-                    create_bare_repo "grandchild-repo-$i-$j"
-                    clone_repo $remote_dir/grandchild-repo-$i-$j $root_dir/user1
-                    add_random_file_and_push $root_dir/user1/grandchild-repo-$i-$j
-                    run rm -rf $root_dir/user1/grandchild-repo-$i-$j
-                done
-            done
-        fi
-    fi
-
-    # Add child repos as submodules to parent
-    if [[ $repos_per_layer -eq 1 ]]; then
+    # Each child needs an initial commit, then is added as a submodule of parent
+    for c in "${children[@]}"; do
+        seed_remote_repo "$c"
         add_repo_as_submodule \
             --superproject "$root_dir/user1/parent-repo" \
-            --child_remote "$remote_dir/child-repo"
-    else
-        for i in $(seq 1 $repos_per_layer); do
-            add_repo_as_submodule \
-                --superproject "$root_dir/user1/parent-repo" \
-                --child_remote "$remote_dir/child-repo-$i"
-        done
-    fi
+            --child_remote "$remote_dir/$c"
+    done
 
+    # Third layer: one grandchild submodule under each child (used by s3).
     if [[ $layers -ge 3 ]]; then
-        # Add grandchild repos as submodules to each child
-        if [[ $repos_per_layer -eq 1 ]]; then
-            add_repo_as_submodule \
-                --superproject "$root_dir/user1/parent-repo/child-repo" \
-                --child_remote "$remote_dir/grandchild-repo"
-        else
-            for i in $(seq 1 $repos_per_layer); do
-                for j in $(seq 1 $repos_per_layer); do
-                    add_repo_as_submodule \
-                        --superproject "$root_dir/user1/parent-repo/child-repo-$i" \
-                        --child_remote "$remote_dir/grandchild-repo-$i-$j"
-                done
-            done
-        fi
+        for c in "${children[@]}"; do
+            local gc="grandchild-repo"
+            [[ ${#children[@]} -gt 1 ]] && gc="grandchild-repo-${c##*-}"
 
-        # Update parent to record each child's new commit (now containing grandchild submodules)
-        if [[ $repos_per_layer -eq 1 ]]; then
+            seed_remote_repo "$gc"
+            add_repo_as_submodule \
+                --superproject "$root_dir/user1/parent-repo/$c" \
+                --child_remote "$remote_dir/$gc"
+
+            # record the child's new commit (it now contains the grandchild)
             update_superproject_with_submodule \
-                "$root_dir/user1/parent-repo" \
-                "child-repo" \
-                "Update child-repo submodule to include grandchild submodules"
-        else
-            for i in $(seq 1 $repos_per_layer); do
-                update_superproject_with_submodule \
-                    "$root_dir/user1/parent-repo" \
-                    "child-repo-$i" \
-                    "Update child-repo-$i submodule to include grandchild submodules"
-            done
-        fi
+                "$root_dir/user1/parent-repo" "$c" \
+                "Update $c submodule to include grandchild submodule"
+        done
     fi
 
     if [[ $extra != "skip-user2" ]]; then

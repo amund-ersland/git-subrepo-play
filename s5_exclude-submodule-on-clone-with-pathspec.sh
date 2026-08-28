@@ -46,7 +46,7 @@ assert_sha_equal "$root_dir/user1/parent-repo/child-repo-1" "$root_dir/user2/par
 INFO "🧪 TEST: child-repo-2 of user1 vs user2 → should NOT be EQUAL. The clone pathspec ':(exclude)child-repo-2' set submodule.active in user2's LOCAL config to exclude it, so it was never checked out and the non-init update skips it — user2 never gets child-repo-2 or its updates."
 assert_sha_not_equal "$root_dir/user1/parent-repo/child-repo-2" "$root_dir/user2/parent-repo/child-repo-2"
 
-INFO "ℹ️  NOTE: The exclusion lives in the CLONER's local config (via the pathspec), not in .gitmodules — child-repo-2 is still listed in .gitmodules. See s7 for why setting active=false in .gitmodules does NOT achieve this on a recursive clone."
+INFO "ℹ️  NOTE: The exclusion lives in the CLONER's local config (via the pathspec), not in .gitmodules — child-repo-2 is still listed in .gitmodules. See s6 for why setting active=false in .gitmodules does NOT achieve this on a recursive clone."
 
 # return to start folder
 cd $_PWD
